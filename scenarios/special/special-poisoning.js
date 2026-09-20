@@ -1,0 +1,31 @@
+SCENARIOS.push({
+  id:"special-poisoning", category:"special", difficulty:2,
+  title:"疑似藥物中毒",
+  summary:"意識改變合併不明藥物空瓶，練習中毒案件的安全與呼吸道處置原則。",
+  steps:[
+    {type:"action", scene:"你接獲通報一名年輕男性疑似服用不明藥物後意識改變，家人在旁邊，現場有藥物空瓶。",
+      prompt:"抵達現場，第一步？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"不明物質案件應先確認環境安全並注意防護，避免自身暴露風險。"},
+      mistakes:[]},
+    {type:"action", scene:"現場安全確認後，你評估病人意識程度為P（對疼痛有反應）。",
+      prompt:"你會如何處理現場的藥物證物？",
+      correct:{tool:"preserveEvidence",target:"scene",explain:"藥物容器等證物對醫院判斷中毒種類與治療方式非常重要，應妥善保留並隨同送醫，不應自行丟棄或嘗試判斷解毒方式。"},
+      mistakes:[]},
+    {type:"action", scene:"病人意識程度不佳（P），你評估呼吸道。",
+      prompt:"意識程度下降的病人，呼吸道管理上你會？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"recovery"},explain:"意識不佳病人容易因舌根後墜或嘔吐物造成呼吸道阻塞，側躺姿勢有助於降低嘔吐物嗆入風險。"},
+      mistakes:[]},
+    {type:"action", scene:"病人仍對聲音反應差，舌根明顯後墜、呼吸仍有鼾聲，但你評估後確認沒有顱底骨折、鼻腔外傷與鼻腔出血。",
+      prompt:"此時適合加上的呼吸道輔助是？",
+      correct:{tool:"oralAirway",target:"head",explain:"有舌根後墜與鼾聲時，口咽氣道（OPA）能暫時維持上氣道通暢；若確認無顱底骨折與鼻腔禁忌，鼻咽氣道（NPA）也可考慮。"},
+      mistakes:[{tool:"nasalAirway",target:"head",explain:"若存在顱底骨折、鼻腔外傷或鼻腔出血，應避免鼻咽氣道，改用口咽氣道或其他更安全的氣道管理。"}]},
+    {type:"action", scene:"你完成初步評估，準備送醫。",
+      prompt:"送醫途中你應？",
+      correct:{tool:"ongoingMonitor",target:"patient",explain:"持續監測意識與呼吸變化，準備因應惡化（如嘔吐、呼吸道問題）。"},
+      mistakes:[]},
+    {type:"action", scene:"即將抵達醫院。",
+      prompt:"你會？",
+      correct:{tool:"handoverReport",target:"scene",explain:"在交班時完整告知現場發現（藥物種類、可能服用時間、意識變化過程），對醫院後續治療判斷非常重要。"},
+      mistakes:[]}
+  ]
+});

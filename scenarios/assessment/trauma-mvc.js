@@ -1,0 +1,61 @@
+SCENARIOS.push({
+  id:"trauma-mvc", category:"assessment", difficulty:3,
+  title:"車禍傷患：全流程評估",
+  summary:"機車自撞傷患，練習從現場安全到送醫決定的完整初步評估流程。",
+  steps:[
+    {type:"action", scene:"你到達現場，看到一輛機車倒在馬路中央，旁邊躺著一名約30歲男性，路口有些許車流經過。",
+      prompt:"你的第一步應該是？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"現場安全評估永遠是第一步，確保救護人員與傷患不會因二次事故受傷，同時判斷是否需要更多資源。"},
+      mistakes:[{tool:"verbalCheck",target:"patient",explain:"未確認現場安全前貿然接觸傷患，可能使自己也成為傷患。"}]},
+    {type:"emergency", timeLimit:8, scene:"你正準備接近機車傷患時，後方突然又發生碰撞：一輛轎車撞上路旁護欄，現場聞到汽油味，駕駛卡在車內，原本的機車傷患仍倒在車流旁。",
+      question:"這個突發狀況下，現在最優先做什麼？",
+      choices:[
+        {text:"先撤到安全位置、警戒車流並通報消防/警察與增援，再重新分流兩處傷患", correct:true, explain:"現場出現二次碰撞與汽油味，救護人員可能暴露在車流與火災危險中；先確保場安、建立警戒並請求適當資源，才能安全處理兩處傷患。"},
+        {text:"先衝到原本的機車傷患旁，完成呼吸道處置後再處理新車禍", correct:false, explain:"原傷患雖然需要評估，但二次碰撞與汽油味代表現場安全已改變；未重新確認場安就接近，可能讓你成為下一名傷患。"},
+        {text:"先進入轎車把駕駛拉出來，因為受困傷患看起來最危急", correct:false, explain:"受困與汽油味可能需要消防救援與專業脫困；未確認車輛穩定、火災風險與救援條件前，不應自行進入。"},
+        {text:"先替原本傷患固定右腿，避免骨折移位，再請路人幫忙看住汽油外洩", correct:false, explain:"肢體固定不能優先於新增的現場危害；路人也不應被派去接近可能起火的汽油外洩區域。"}
+      ]},
+    {type:"action", scene:"現場已管制安全，你準備接觸傷患。",
+      prompt:"接觸前你應該？",
+      correct:{tool:"gloves",target:"self",explain:"標準防護措施（BSI）是接觸傷患前的必要步驟，避免體液交叉感染。"},
+      mistakes:[{tool:"generalImpression",target:"patient",explain:"應先做好防護才接觸傷患。"}]},
+    {type:"action", scene:"你靠近傷患，觀察到他倒在機車旁，安全帽脫落，右腿呈不自然角度。",
+      prompt:"此時你要形成的是？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["head:scalp","rightLeg:legWound","patient:posture","patient:sceneClue"],
+        giFindings:{
+          "head:scalp":"頭皮沒有明顯傷口，但安全帽已經脫落，仍需持續留意頭部狀況",
+          "rightLeg:legWound":"右腿呈現明顯不自然角度變形",
+          "patient:posture":"倒臥在機車旁，還沒完全確認意識狀態",
+          "patient:sceneClue":"機車倒地、安全帽脫落，現場痕跡符合高速撞擊機轉"
+        },
+        explain:"建立整體印象包含觀察年齡、性別、傷病機轉（MOI）與明顯危及生命徵象，決定後續處置優先順序。"},
+      mistakes:[{tool:"splint",target:"rightLeg",explain:"應先完成初步評估（意識、ABC），排除立即威脅生命的問題後才處理肢體傷害。"}]},
+    {type:"action", scene:"你呼喚傷患「先生你還好嗎？」，他睜開眼睛看你，但沒有正確回答問題。",
+      prompt:"下一步要評估什麼？",
+      correct:{tool:"verbalCheck",target:"patient",explain:"對聲音有反應但無法正確應答屬於AVPU中的V；意識程度下降是警訊，下一步依序檢查呼吸道。"},
+      mistakes:[{tool:"history",target:"patient",explain:"完全清醒能正確對答才適合直接問病史，此傷患無法正確回應。"}]},
+    {type:"action", scene:"你檢查呼吸道，聽到傷患呼吸有些許鼾聲，呼吸較淺。",
+      prompt:"你應該？",
+      correct:{tool:"openAirway",target:"head",explain:"鼾聲代表呼吸道部分阻塞（常見於舌根後墜），需先處理呼吸道；之後可考慮給予高濃度氧氣。"},
+      mistakes:[{tool:"pulseCheck",target:"neck",explain:"ABC順序中呼吸道問題須優先處理，否則會惡化為完全阻塞。"}]},
+    {type:"action", scene:"呼吸道打開後鼾聲消失，呼吸變得較平順。",
+      prompt:"評估循環時你應該？",
+      correct:{tool:"pulseCheck",target:"neck",
+        reading:"頸動脈 124次/分，脈搏細弱；皮膚微濕冷",
+        explain:"循環評估重點：脈搏品質、皮膚CTC、以及立即檢查並控制危及生命的大出血。"},
+      mistakes:[{tool:"bloodPressure",target:"leftArm",explain:"血壓屬於詳細生命徵象測量，初步評估階段先用觸診與觀察快速判斷。"}]},
+    {type:"choice", scene:"右腿有明顯變形但沒有大量出血。",
+      question:"根據剛才觸診的脈搏與皮膚狀況，你判斷這名傷患的後送優先度應該是？",
+      choices:[
+        {text:"高優先度（Load and Go）：意識下降＋呼吸異常＋循環徵象不佳，應盡速穩定後迅速送醫", correct:true, explain:"意識下降、呼吸異常、脈搏弱快合併皮膚濕冷都是低灌流/休克前兆，屬於高優先傷患，不應在現場做完整詳細檢查。"},
+        {text:"低優先度：先在現場把腿部骨折固定包紮好，處理完再考慮後續送醫步驟", correct:false, explain:"目前徵象顯示可能有內出血或休克前兆，屬於高優先，不應在現場花時間做完整的肢體固定處置。"},
+        {text:"傷患目前意識還能有反應，外觀上主要是肢體變形，先聯絡骨科門診安排後續回診即可", correct:false, explain:"意識程度下降合併循環徵象不佳，已經是危及生命的警訊，需要儘速送醫而非安排門診。"},
+        {text:"送醫方式與時機屬於重大決定，應該等家屬到場討論並同意後才能執行", correct:false, explain:"傷患有危及生命徵象時，送醫決定應依臨床判斷儘速進行，不應為等待家屬同意而延誤。"}
+      ]},
+    {type:"action", scene:"你決定盡速後送，同時持續評估。",
+      prompt:"在前往醫院途中，你應該？",
+      correct:{tool:"ongoingMonitor",target:"patient",explain:"持續評估貫穿整個救護過程，需反覆檢查變化趨勢，確認處置是否有效，並準備向醫院交班。"},
+      mistakes:[]}
+  ]
+});

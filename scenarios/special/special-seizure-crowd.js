@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-seizure-crowd", category:"special", difficulty:2,
+  title:"聚會中突然倒下抽搐的年輕人",
+  summary:"朋友聚會時一人突然倒地抽搐，同伴驚慌失措甚至想壓住他，你要同時控制人群又完成正確的處置。",
+  steps:[
+    {type:"choice", scene:"你抵達時，一群朋友圍在一位20多歲男性旁邊，他倒在地上四肢僵直抽動，口吐白沫，其中一人正用力壓住他的手腳想讓他「不要抽」，還有人拿著手機在旁邊拍。",
+      question:"你到場後的第一個動作？",
+      choices:[
+        {text:"請大家往後退出安全距離，明確請正在壓制他的人立刻放手，同時開始清空周圍容易造成撞傷的物品", correct:true, explain:"抽搐發作時不應該強行壓制肢體，用力壓制反而可能造成骨折或脫臼；正確做法是保護病人不要撞到周圍物品，而不是限制他的動作。"},
+        {text:"先加入幫忙一起按住他的四肢，避免他抽動時撞到東西受傷", correct:false, explain:"用力壓制抽搐中的肢體本身就可能造成肌肉拉傷、關節脫臼或骨折，不是正確的處置方式。"},
+        {text:"請大家先安靜下來，開始詢問是誰認識他、了解他過去病史再決定怎麼處理", correct:false, explain:"這時候應該優先確保病人周圍安全、避免二次傷害，詢問病史可以稍後再進行，不是當下最優先的動作。"},
+        {text:"直接把手指或東西塞進他嘴裡防止咬到舌頭", correct:false, explain:"這是常見的錯誤迷思，塞東西進嘴裡反而可能造成牙齒斷裂、異物阻塞呼吸道，或咬傷/咬斷施救者的手指。"}
+      ]},
+    {type:"action", scene:"抽動持續中，旁邊圍觀的人越來越多、越靠越近。",
+      prompt:"你會做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"持續注意抽動病人周圍是否有尖銳物、桌角等危險物品，並請圍觀者保持距離，避免二次傷害也避免影響你們的操作空間。"},
+      mistakes:[]},
+    {type:"action", scene:"大約90秒後，他停止抽動，呼吸有痰音，意識還沒恢復。",
+      prompt:"你會協助他採取什麼姿勢？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"recovery"},explain:"癲癇發作後意識未恢復的病人，應採復甦姿勢（側躺），讓口腔分泌物自然流出，避免嘔吐物或分泌物阻塞呼吸道。"},
+      mistakes:[]},
+    {type:"action", scene:"側躺後，你評估他的呼吸。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"lookListenFeel",target:"chest",respRate:20,
+        reading:"20次/分，呼吸時有痰音",
+        explain:"癲癇發作後常見短暫的意識未恢復與呼吸不太順暢，需持續評估直到完全恢復正常。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸評估後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"simpleMask", flowMin:6, flowMax:10},
+        explain:"分泌物與發作後短暫的呼吸抑制可能造成血氧下降，給予氧氣支持呼吸。"},
+      mistakes:[]},
+    {type:"choice", scene:"他漸漸恢復意識，睜開眼卻顯得很困惑，身邊圍觀的朋友七嘴八舌搶著告訴你剛才發生的事，有人說「他絕對是被欺負動了什麼手腳」，也有人說「他最近晚上都沒睡，一直在打電動」。",
+      question:"面對這些眾說紛紜的目擊者說法，你會怎麼處理？",
+      choices:[
+        {text:"有禮貌地請大家一次一位發言，優先詢問跟他比較熟的朋友，記錄抽搐的持續時間、有無過去癲癇病史、睡眠與用藥狀況等具體資訊，其餘傳言留給醫院進一步確認", correct:true, explain:"用有結構的方式收集現場目擊資訊（發作時間、過去病史、用藥狀況等），比放任大家七嘴八舌更能取得對後續治療有用的資料。"},
+        {text:"既然大家七嘴八舌講的都不一樣，乾脆都不要問，等他自己醒來說清楚就好", correct:false, explain:"完全放棄詢問目擊者資訊，會漏掉像是抽搐持續時間、過去病史這類病人自己可能還說不清楚的重要資訊。"},
+        {text:"先採信說他被欺負動手腳的說法，優先當作外傷事件處理並要求在場的人都不要離開等警察來", correct:false, explain:"在沒有實際證據前就採信單一傳言並下判斷，超出救護人員現場應扮演的角色，也可能誤導你的臨床處置方向。"},
+        {text:"跟大家說這些資訊對你們的處置沒有幫助，等病人完全清醒後直接送醫就好，不需要額外記錄", correct:false, explain:"目擊者提供的病史資訊（如過去有無癲癇、是否規律用藥）對醫院後續診斷治療很重要，不應該被忽略。"}
+      ]},
+    {type:"action", scene:"你決定跟其中一位比較熟悉他的朋友進一步確認狀況。",
+      prompt:"你會使用什麼方式？",
+      correct:{tool:"history",target:"patient",
+        reading:"朋友表示他確診癲癇約兩年，最近常熬夜打電動，這幾天有點忘記按時服藥",
+        explain:"用SAMPLE（Signs/Symptoms症狀、Allergies過敏史、Medications用藥、Past history過去病史、Last meal最後一餐、Events事件經過）詢問架構收集資訊，這些對醫院後續診斷很有幫助。"},
+      mistakes:[]},
+    {type:"action", scene:"你準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",explain:"交班時說明癲癇發作經過（目擊時間、抽搐持續時間約90秒、發作後意識恢復情形），以及朋友提供的病史資訊（確診癲癇、近期可能沒有規律服藥），這些資訊對醫院後續治療很重要。"},
+      mistakes:[]}
+  ]
+});
