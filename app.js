@@ -172,6 +172,542 @@ const GCS_MOTOR = [
   {score:2, label:"2分・對疼痛肢體異常伸直"},
   {score:1, label:"1分・無反應"}
 ];
+/* SAMPLE 病史詢問小遊戲：六大類各給4種問法，練習「怎麼問」而不是直接看到答案。
+   問法本身通用於所有情境，選完後顯示的病患／家屬回答仍是該情境原本的 reading／explain。 */
+/* 送醫交班小遊戲：通用的交班重點清單，勾出這次交班會提到的項目，
+   核心重點全部勾到才能完成；個別情境的特別提醒仍會用該步驟原本的 explain 顯示。 */
+const HANDOVER_CHECKLIST = [
+  {id:"identity", label:"病患年齡與主訴（現場遇到什麼狀況）", relevant:true},
+  {id:"moi", label:"發生機轉／經過（怎麼發生的）", relevant:true},
+  {id:"vitals", label:"意識程度與目前生命徵象", relevant:true},
+  {id:"exam", label:"評估發現的重點異常", relevant:true},
+  {id:"treatment", label:"已經給予的處置與病患反應", relevant:true},
+  {id:"history", label:"過敏史、用藥史與重要病史", relevant:true},
+  {id:"clothing", label:"病患的衣著品牌或穿著風格", relevant:false},
+  {id:"bystander", label:"現場圍觀者的反應或情緒", relevant:false}
+];
+
+const SAMPLE_QUESTION_BANK = [
+  {key:"s", letter:"S", label:"Signs/Symptoms 症狀",
+    questions:[
+      {text:"你現在最不舒服的地方是哪裡？可以多形容一下是什麼樣的感覺嗎？", correct:true, note:"開放式問法，讓病人自己描述部位與性質，比較不會漏掉重要症狀。"},
+      {text:"你是不是這裡在痛？", correct:false, note:"直接指定部位詢問，容易漏掉病人真正想描述的其他症狀。"},
+      {text:"你會不會喘、會不會頭暈？", correct:false, note:"用是非題列舉症狀，範圍容易被你列的清單侷限住。"},
+      {text:"你現在感覺還好嗎？", correct:false, note:"太籠統，容易只得到「還好」這種沒有資訊量的回答。"}
+    ]},
+  {key:"a", letter:"A", label:"Allergies 過敏史",
+    questions:[
+      {text:"你對藥物、食物或其他東西會不會過敏？之前發作時是什麼反應？", correct:true, note:"涵蓋各類過敏原並追問反應，資訊比較完整。"},
+      {text:"你有沒有藥物過敏？", correct:false, note:"只問到藥物，容易漏掉食物或環境過敏原。"},
+      {text:"你會不會對海鮮過敏？", correct:false, note:"預設了特定過敏原，屬於帶有引導性的問法。"},
+      {text:"有沒有什麼要特別注意的？", correct:false, note:"太模糊，對方不一定會聯想到要講過敏史。"}
+    ]},
+  {key:"m", letter:"M", label:"Medications 用藥史",
+    questions:[
+      {text:"你最近有沒有固定在吃什麼藥？醫生開的或自己買的都可以告訴我", correct:true, note:"開放式且明確涵蓋處方藥與成藥，比較不會漏掉。"},
+      {text:"你有在吃血壓藥嗎？", correct:false, note:"預設了特定藥物種類，屬於帶有引導性的問法。"},
+      {text:"你有沒有吃藥？", correct:false, note:"太簡短封閉，容易只得到「沒有」這種不完整的答案。"},
+      {text:"你身體有什麼慢性病？", correct:false, note:"問的其實是過去病史（P），不是正在使用的藥物。"}
+    ]},
+  {key:"p", letter:"P", label:"Pertinent past history 過去病史",
+    questions:[
+      {text:"你以前有沒有重大疾病、開過刀，或正在治療中的慢性病？", correct:true, note:"涵蓋重大疾病、手術與慢性病，範圍完整。"},
+      {text:"你有沒有心臟病？", correct:false, note:"預設了特定疾病，屬於帶有引導性的問法。"},
+      {text:"你身體一直都很健康嗎？", correct:false, note:"容易誘導對方直接回答「是」，可能略過真正的病史。"},
+      {text:"你今年幾歲？", correct:false, note:"問的是年齡，不是病史本身。"}
+    ]},
+  {key:"l", letter:"L", label:"Last oral intake 最後進食",
+    questions:[
+      {text:"你最後一次吃東西或喝水是什麼時候？吃了什麼？", correct:true, note:"直接問最後進食的時間與內容，最貼近這個類別要問的資訊。"},
+      {text:"你今天有吃早餐嗎？", correct:false, note:"預設了時間範圍在今天早上，可能漏掉真正最後進食的時間。"},
+      {text:"你會不會肚子餓？", correct:false, note:"問的是飢餓感，不是實際最後進食的時間。"},
+      {text:"你有沒有喝酒？", correct:false, note:"只問特定物質，不是完整的最後進食狀況。"}
+    ]},
+  {key:"e", letter:"E", label:"Events leading up 事發經過",
+    questions:[
+      {text:"可以照順序告訴我，這次不舒服是怎麼開始、發生了什麼事嗎？", correct:true, note:"開放式問法，請對方照時間順序描述，比較能問出完整經過。"},
+      {text:"你怎麼了？", correct:false, note:"太籠統的開場，容易只得到簡短、不完整的敘述。"},
+      {text:"是誰打電話叫救護車的？", correct:false, note:"問的是「誰報案」，不是醫療事件本身的經過。"},
+      {text:"你剛剛在做什麼？", correct:false, note:"只問當下活動，容易漏掉症狀怎麼演變的細節。"}
+    ]}
+];
+
+/* 延伸知識：病理生理小挑戰。用關鍵字比對情境的 id/title/summary，
+   自動挑出跟該情境主題相關的題目，顯示在結果頁，屬於不計分的額外挑戰。 */
+const PATHOPHYS_BANK = [
+  {topic:"stroke", keywords:["中風","stroke","fast"], questions:[
+    {question:"中風主要分成缺血性（血栓阻塞）與出血性（血管破裂）兩大類，下列何者正確？",
+      choices:[
+        {text:"缺血性中風約占大多數病例，出血性中風比例雖較低，死亡率通常更高", correct:true, explain:"血栓阻塞造成的缺血性中風較常見，但血管破裂出血的出血性中風往往病情更兇猛。"},
+        {text:"出血性中風占絕大多數，缺血性中風非常罕見", correct:false, explain:"實際上缺血性中風才是多數，這個說法顛倒了。"},
+        {text:"兩種中風的致病機轉完全相同，差別只在血壓高低", correct:false, explain:"一個是血管阻塞、一個是血管破裂，機轉不同。"},
+        {text:"缺血性中風一定合併明顯外傷病史，出血性中風則不會", correct:false, explain:"兩種中風都可能沒有外傷病史，這不是分類依據。"}
+      ]},
+    {question:"為什麼中風評估要特別記錄「最後一次確認正常的時間」？",
+      choices:[
+        {text:"醫院能否使用某些急性期治療，高度取決於症狀發作後經過的時間", correct:true, explain:"時間就是腦細胞，許多治療有嚴格的時間窗限制。"},
+        {text:"只是為了統計資料完整，跟治療決策無關", correct:false, explain:"這個時間點直接影響醫院能採取的治療選項。"},
+        {text:"這是為了醫院計算費用使用", correct:false, explain:"這與收費無關，是臨床治療決策的關鍵依據。"},
+        {text:"只是例行詢問，對實際處置沒有影響", correct:false, explain:"這項資訊會實質影響醫院的治療方案選擇。"}
+      ]}
+  ]},
+  {topic:"cardiac", keywords:["胸痛","心肌梗塞","急性冠心","acs","心臟"], questions:[
+    {question:"急性心肌梗塞常見的病理機轉是什麼？",
+      choices:[
+        {text:"冠狀動脈內的粥狀斑塊破裂形成血栓，阻塞血流造成心肌缺氧壞死", correct:true, explain:"斑塊破裂誘發血栓是急性心肌梗塞最常見的機轉。"},
+        {text:"單純因為心跳速率過快，心臟過度疲勞造成損傷", correct:false, explain:"心跳快慢不是心肌梗塞的主要致病機轉。"},
+        {text:"是心臟瓣膜先天性閉鎖不全直接造成的結果", correct:false, explain:"瓣膜問題是另一類心臟疾病，與冠狀動脈阻塞不同。"},
+        {text:"主要是肺部感染引發的併發症，跟冠狀動脈無關", correct:false, explain:"心肌梗塞的核心問題在冠狀動脈供血，不是肺部感染。"}
+      ]},
+    {question:"為什麼糖尿病或老年患者的心肌梗塞可能沒有典型胸痛？",
+      choices:[
+        {text:"自主神經病變或痛覺感受改變，可能讓這些族群表現為非典型症狀，如噁心、冒汗或單純疲倦", correct:true, explain:"這類患者常見「無聲」或非典型表現，容易被忽略。"},
+        {text:"這種情況極為罕見，臨床上幾乎不需要考慮", correct:false, explain:"實際上並不罕見，是臨床上需要特別留意的族群。"},
+        {text:"沒有胸痛就代表心臟本身沒有受到影響", correct:false, explain:"沒有胸痛不能排除心肌梗塞，尤其在這些族群中。"},
+        {text:"只有年輕人才會出現非典型症狀", correct:false, explain:"非典型表現在老年與糖尿病患者中反而更常見。"}
+      ]}
+  ]},
+  {topic:"asthma", keywords:["氣喘","asthma","喘鳴","呼吸道"], questions:[
+    {question:"氣喘發作時出現喘鳴聲的主要原因是什麼？",
+      choices:[
+        {text:"支氣管平滑肌痙攣收縮、氣道發炎腫脹與黏液分泌增加，共同造成呼吸道狹窄", correct:true, explain:"這三個機轉合併起來造成氣道阻力增加，產生喘鳴聲。"},
+        {text:"單純是肺泡本身破裂造成的聲音", correct:false, explain:"喘鳴聲來自狹窄氣道的氣流震動，不是肺泡破裂。"},
+        {text:"喘鳴聲只會在吸氣時出現，呼氣完全不受影響", correct:false, explain:"氣喘的喘鳴聲通常呼氣時更明顯。"},
+        {text:"是心臟衰竭直接造成的聲音，跟支氣管無關", correct:false, explain:"氣喘的喘鳴機轉主要在支氣管，與心臟衰竭不同。"}
+      ]},
+    {question:"為什麼嚴重氣喘發作時，喘鳴聲突然「變安靜」反而可能是危險徵象？",
+      choices:[
+        {text:"可能代表氣道阻塞已經嚴重到幾乎沒有空氣能夠流動，是惡化而非改善的警訊", correct:true, explain:"「安靜的胸腔」常是呼吸衰竭前兆，需要高度警覺。"},
+        {text:"代表氣喘已經完全緩解，可以放心結束處置", correct:false, explain:"這個變化往往代表病情惡化，不是緩解。"},
+        {text:"喘鳴聲消失一定是因為藥物已經生效", correct:false, explain:"不能單憑聲音消失就判斷藥物生效，需綜合評估。"},
+        {text:"這種情況沒有特殊臨床意義", correct:false, explain:"這是需要高度警覺的重要警訊。"}
+      ]}
+  ]},
+  {topic:"anaphylaxis", keywords:["過敏性休克","anaphylaxis","蜂螫","epipen","腎上腺素自動注射"], questions:[
+    {question:"過敏性休克造成血壓下降與呼吸道腫脹的主要機轉是什麼？",
+      choices:[
+        {text:"免疫系統大量釋放組織胺等發炎介質，造成全身血管擴張、通透性增加與呼吸道黏膜腫脹", correct:true, explain:"這是典型的第一型過敏反應機轉。"},
+        {text:"單純是心臟收縮力突然完全喪失所造成", correct:false, explain:"核心機轉在血管與呼吸道反應，不是心臟收縮力喪失。"},
+        {text:"是細菌感染直接侵犯血管壁的結果", correct:false, explain:"過敏性休克是免疫反應，與細菌感染機轉不同。"},
+        {text:"跟免疫系統沒有關聯，純粹是機械性氣道阻塞", correct:false, explain:"這是免疫系統過度反應所致，並非單純機械性阻塞。"}
+      ]},
+    {question:"為什麼腎上腺素是治療過敏性休克的第一線藥物？",
+      choices:[
+        {text:"腎上腺素能同時讓血管收縮、支氣管擴張，直接對抗過敏反應造成的血壓下降與呼吸道腫脹", correct:true, explain:"這正好對抗過敏性休克的兩大核心問題。"},
+        {text:"腎上腺素主要作用是止痛，跟過敏反應機轉沒有直接關係", correct:false, explain:"腎上腺素的關鍵作用在血管與支氣管，不是止痛。"},
+        {text:"腎上腺素只對食物過敏有效，對蜂螫引起的過敏無效", correct:false, explain:"不論過敏原為何，腎上腺素的作用機轉相同。"},
+        {text:"腎上腺素的效果通常要數小時才會出現", correct:false, explain:"腎上腺素作用非常迅速，這正是它被列為首選的原因之一。"}
+      ]}
+  ]},
+  {topic:"diabetic", keywords:["血糖","低血糖","diabetic","glucose"], questions:[
+    {question:"低血糖時病人意識改變、冒冷汗、心悸的原因是什麼？",
+      choices:[
+        {text:"腦細胞主要依賴葡萄糖供能，血糖過低影響腦部功能；身體同時釋放腎上腺素等激素試圖升高血糖，造成冒汗心悸", correct:true, explain:"這是腦部缺糖與交感神經代償反應的組合表現。"},
+        {text:"純粹是心臟血流不足造成，跟血糖濃度沒有直接關係", correct:false, explain:"核心問題在血糖濃度過低，不是單純血流不足。"},
+        {text:"是身體脫水造成的症狀，跟葡萄糖代謝無關", correct:false, explain:"這些症狀主要由血糖過低所引起。"},
+        {text:"低血糖只會影響肌肉，不會影響腦部功能", correct:false, explain:"腦部對血糖非常敏感，是低血糖最先受影響的器官之一。"}
+      ]},
+    {question:"為什麼意識不清的疑似低血糖患者不能直接口服給糖？",
+      choices:[
+        {text:"意識不清時吞嚥反射可能不可靠，口服糖分有嗆入氣管、造成吸入性肺炎或窒息的風險", correct:true, explain:"保護呼吸道永遠優先於口服處置。"},
+        {text:"口服糖分對意識不清的患者完全沒有風險，只是效果比較慢", correct:false, explain:"實際上有嗆入的風險，不是單純效果慢的問題。"},
+        {text:"因為糖分只能透過針劑才有效果，口服完全無法吸收", correct:false, explain:"清醒患者口服糖分是有效的，問題在意識不清時的嗆入風險。"},
+        {text:"意識不清時血糖其實已經自動恢復正常", correct:false, explain:"意識不清不代表血糖已恢復，仍需要評估處置。"}
+      ]}
+  ]},
+  {topic:"seizure", keywords:["癲癇","抽搐","seizure","熱性痙攣"], questions:[
+    {question:"癲癇發作（抽搐）的病理機轉大致是什麼？",
+      choices:[
+        {text:"腦部神經元出現異常、過度同步的放電活動，造成不自主的肌肉抽動與意識改變", correct:true, explain:"這是癲癇發作最核心的神經生理機轉。"},
+        {text:"單純是肌肉本身缺鈣造成的抽筋，跟腦部活動無關", correct:false, explain:"癲癇的根本問題在腦部異常放電，不是單純肌肉缺鈣。"},
+        {text:"是心臟暫停跳動直接造成的反應", correct:false, explain:"癲癇發作的原發問題在腦部，不是心臟停止。"},
+        {text:"只會發生在有頭部外傷病史的人身上", correct:false, explain:"癲癇成因很多，不限於曾有頭部外傷者。"}
+      ]},
+    {question:"為什麼癲癇發作後（postictal）病人常常意識模糊、想睡？",
+      choices:[
+        {text:"劇烈放電消耗大量能量，腦部需要時間恢復正常活動，這段恢復期常見意識程度暫時下降", correct:true, explain:"這段「發作後期」是正常的腦部恢復過程。"},
+        {text:"這代表患者又再次發作，應該立即壓制身體", correct:false, explain:"發作後嗜睡是正常恢復現象，不代表再次發作，也不應壓制。"},
+        {text:"發作後意識模糊一定代表有永久性腦損傷", correct:false, explain:"多數情況下這只是暫時性的恢復期表現。"},
+        {text:"這只是患者裝睡，實際上意識完全正常", correct:false, explain:"這是真實的生理恢復過程，不是裝睡。"}
+      ]}
+  ]},
+  {topic:"heat", keywords:["中暑","熱衰竭","heat"], questions:[
+    {question:"中暑（heat stroke）最核心的病理問題是什麼？",
+      choices:[
+        {text:"身體體溫調節機制失效，核心體溫過度升高，可能造成多重器官功能受損", correct:true, explain:"調節失效造成的高體溫是中暑最核心的問題。"},
+        {text:"單純是流汗過多造成的脫水，跟體溫調節無關", correct:false, explain:"脫水可能伴隨發生，但核心問題是體溫調節失效。"},
+        {text:"是心臟本身結構異常所導致", correct:false, explain:"中暑的原發問題在體溫調節系統，不是心臟結構。"},
+        {text:"只是曬傷的一種嚴重表現", correct:false, explain:"中暑與曬傷是不同的病理過程。"}
+      ]},
+    {question:"為什麼中暑患者「不再流汗、皮膚乾熱」反而是更危險的警訊？",
+      choices:[
+        {text:"代表體溫調節系統已經失代償、無法再透過排汗散熱，核心體溫可能持續飆升", correct:true, explain:"這是體溫調節系統崩潰的表現，情況危急。"},
+        {text:"皮膚乾燥代表體內水分已經完全恢復正常", correct:false, explain:"這通常代表調節機制失效，而非恢復正常。"},
+        {text:"不流汗代表症狀正在改善，風險其實降低了", correct:false, explain:"這其實是病情惡化的警訊，不是改善。"},
+        {text:"這種現象跟體溫調節無關，只是單純皮膚乾燥", correct:false, explain:"這正是體溫調節系統失效的直接表現。"}
+      ]}
+  ]},
+  {topic:"hypothermia", keywords:["低體溫","hypothermia","失溫"], questions:[
+    {question:"低體溫症會影響心臟節律的原因是什麼？",
+      choices:[
+        {text:"體溫過低會干擾心肌細胞的電生理活動，增加心律不整（包括致命性心室顫動）的風險", correct:true, explain:"低體溫對心臟電生理活動有直接影響，風險不容忽視。"},
+        {text:"低體溫完全不會影響心臟，只會影響肌肉活動", correct:false, explain:"低體溫對心臟節律有明確且重要的影響。"},
+        {text:"低體溫只會讓心跳變快，不會有節律異常的風險", correct:false, explain:"低體溫的風險包含嚴重的心律不整，不只是心跳變化。"},
+        {text:"這只是理論上的風險，臨床上從未真正發生", correct:false, explain:"這是臨床上真實且重要的風險，需要謹慎處置。"}
+      ]},
+    {question:"為什麼嚴重低體溫患者要避免劇烈搬動？",
+      choices:[
+        {text:"劇烈搬動可能讓周邊冰冷血液突然回流心臟，誘發致命性心律不整", correct:true, explain:"這是低體溫患者搬運時特別強調輕柔的原因。"},
+        {text:"劇烈搬動只會造成肌肉痠痛，沒有其他風險", correct:false, explain:"實際風險遠不只肌肉痠痛，可能誘發致命心律不整。"},
+        {text:"搬動患者跟心臟節律完全沒有關聯", correct:false, explain:"兩者有直接的生理關聯。"},
+        {text:"只有清醒的患者才需要注意搬動方式", correct:false, explain:"意識不清的嚴重低體溫患者風險反而更高。"}
+      ]}
+  ]},
+  {topic:"co-poisoning", keywords:["一氧化碳","co-poisoning","co中毒"], questions:[
+    {question:"一氧化碳中毒造成組織缺氧的主要機轉是什麼？",
+      choices:[
+        {text:"一氧化碳與血紅素的結合力遠大於氧氣，會取代氧氣結合位置，大幅降低血液攜氧能力", correct:true, explain:"這是一氧化碳中毒最核心的病理機轉。"},
+        {text:"一氧化碳會直接破壞肺泡結構，跟血紅素沒有關係", correct:false, explain:"核心問題在血紅素結合，不是肺泡結構破壞。"},
+        {text:"一氧化碳中毒的機轉與氧氣濃度完全無關", correct:false, explain:"一氧化碳正是透過影響攜氧能力造成缺氧。"},
+        {text:"一氧化碳只會刺激氣管黏膜，不影響攜氧能力", correct:false, explain:"其主要危害正是嚴重影響血液攜氧能力。"}
+      ]},
+    {question:"為什麼一氧化碳中毒患者的血氧機讀數可能顯示「正常」卻仍嚴重缺氧？",
+      choices:[
+        {text:"一般血氧機無法區分帶氧血紅素與一氧化碳血紅素，可能誤判為血氧正常，掩蓋真實缺氧程度", correct:true, explain:"這是一氧化碳中毒臨床評估上常見的陷阱。"},
+        {text:"血氧機在一氧化碳中毒時一定會準確顯示嚴重過低的數值", correct:false, explain:"實際上常會被誤判為正常，這正是危險之處。"},
+        {text:"這種情況只在血氧機故障時才會發生", correct:false, explain:"這是血氧機原理上的限制，不是故障。"},
+        {text:"一氧化碳中毒不會影響血氧機的讀數判讀", correct:false, explain:"這正是需要特別留意的判讀陷阱。"}
+      ]}
+  ]},
+  {topic:"organophosphate", keywords:["有機磷","organophosphate","農藥"], questions:[
+    {question:"有機磷中毒造成大量分泌物、瞳孔縮小、肌肉抽動的原因是什麼？",
+      choices:[
+        {text:"有機磷會抑制乙醯膽鹼酯酶，造成體內乙醯膽鹼過度累積，過度刺激副交感神經系統", correct:true, explain:"這是有機磷中毒的核心藥理機轉。"},
+        {text:"有機磷會直接破壞肌肉纖維結構，跟神經傳導物質無關", correct:false, explain:"核心機轉在神經傳導物質累積，不是肌肉結構破壞。"},
+        {text:"這些症狀單純是皮膚接觸刺激造成的過敏反應", correct:false, explain:"這是全身性的神經傳導物質累積效應，不是單純過敏。"},
+        {text:"有機磷中毒主要影響視力，不會影響其他系統", correct:false, explain:"有機磷中毒是全身性影響，遠不只視力。"}
+      ]},
+    {question:"為什麼有機磷中毒可能造成呼吸衰竭？",
+      choices:[
+        {text:"過度的膽鹼激活會造成呼吸道分泌物增加、支氣管收縮，並可能影響呼吸肌肉的神經傳導", correct:true, explain:"這些機轉合併起來可能導致致命的呼吸衰竭。"},
+        {text:"有機磷只會影響腸胃道，不會影響呼吸功能", correct:false, explain:"呼吸系統正是有機磷中毒最需要警覺的威脅之一。"},
+        {text:"呼吸衰竭與有機磷中毒無關，通常是巧合的其他疾病", correct:false, explain:"呼吸衰竭是有機磷中毒的直接且重要的併發症。"},
+        {text:"有機磷中毒只在極高劑量下才會有任何生理影響", correct:false, explain:"即使中等劑量暴露也可能出現明顯症狀。"}
+      ]}
+  ]},
+  {topic:"shock", keywords:["休克","shock","失血"], questions:[
+    {question:"失血性休克早期，為什麼血壓可能仍維持在接近正常的範圍？",
+      choices:[
+        {text:"身體會透過交感神經反應讓周邊血管收縮、心跳加快來代償失血，血壓在早期可能仍被暫時維持住", correct:true, explain:"這種代償機制常讓早期休克容易被低估。"},
+        {text:"早期失血對血壓完全沒有影響，只有大量失血才會影響血壓", correct:false, explain:"身體有代償機制，並非完全沒有影響，只是尚未表現出來。"},
+        {text:"血壓正常就代表沒有內出血的可能", correct:false, explain:"血壓正常不能排除早期休克或內出血。"},
+        {text:"身體沒有任何代償機制，血壓一失血就會立即下降", correct:false, explain:"身體確實有代償機制，這正是早期休克容易被忽略的原因。"}
+      ]},
+    {question:"休克患者皮膚濕冷、蒼白的原因是什麼？",
+      choices:[
+        {text:"身體優先將血流集中供應心臟、腦部等重要器官，周邊皮膚血流減少，造成濕冷蒼白", correct:true, explain:"這是身體保護重要器官的代償反應。"},
+        {text:"皮膚濕冷只是環境溫度造成的巧合，跟循環狀態無關", correct:false, explain:"這其實是循環代償機制的直接表現。"},
+        {text:"這個徵象只會出現在外傷患者身上，其他休克類型不會有", correct:false, explain:"各類型休克都可能出現周邊血流減少的表現。"},
+        {text:"皮膚濕冷代表患者體溫過高，正在發燒", correct:false, explain:"這通常代表周邊循環不良，而非發燒。"}
+      ]}
+  ]},
+  {topic:"burn", keywords:["燒傷","燙傷","burn"], questions:[
+    {question:"燒傷面積大時可能造成低血容性休克，機轉是什麼？",
+      choices:[
+        {text:"受損皮膚的微血管通透性增加，大量血漿液體滲漏到組織間隙與體外，造成有效循環血量下降", correct:true, explain:"這是大面積燒傷造成休克的核心機轉。"},
+        {text:"燒傷造成休克主要是因為病人感到劇烈疼痛，跟體液流失無關", correct:false, explain:"疼痛不是主因，核心是大量體液流失。"},
+        {text:"只有深度燒傷才會影響循環系統，淺層燒傷完全不會", correct:false, explain:"燒傷面積大小比深度更直接影響體液流失的程度。"},
+        {text:"燒傷造成休克的機轉跟燙傷面積大小沒有關聯", correct:false, explain:"燒傷面積是決定體液流失量、進而影響休克風險的關鍵因素。"}
+      ]},
+    {question:"為什麼燒傷傷口需要儘快局部降溫，卻又要避免全身過度冷卻？",
+      choices:[
+        {text:"局部降溫能減少熱能持續傷害組織，但大面積燒傷患者皮膚屏障受損、體溫調節能力下降，過度全身冷卻可能誘發低體溫", correct:true, explain:"這是燒傷處置中需要平衡的兩個原則。"},
+        {text:"降溫對燒傷處置完全沒有幫助，純粹是安慰患者的做法", correct:false, explain:"適當的局部降溫確實有助於減少組織傷害。"},
+        {text:"燒傷患者不可能出現低體溫，不需要考慮保暖", correct:false, explain:"大面積燒傷患者其實特別容易出現低體溫。"},
+        {text:"全身冷卻程度不會受燒傷面積大小影響", correct:false, explain:"燒傷面積越大，皮膚屏障受損越嚴重，越容易散失體溫。"}
+      ]}
+  ]},
+  {topic:"bleeding", keywords:["止血帶","出血","tourniquet","bleeding"], questions:[
+    {question:"止血帶壓迫肢體止血的原理是什麼？",
+      choices:[
+        {text:"止血帶施加足夠壓力壓迫肢體動脈，中斷血流以阻止傷口持續出血", correct:true, explain:"這是止血帶最基本的物理止血原理。"},
+        {text:"止血帶主要作用是讓傷口加速凝血，跟壓迫血管無關", correct:false, explain:"止血帶的作用機轉是物理性阻斷血流，不是促進凝血。"},
+        {text:"止血帶只對靜脈出血有效，對動脈出血完全無效", correct:false, explain:"止血帶正是用來控制動脈這類高壓出血的重要工具。"},
+        {text:"止血帶的效果來自於冰敷降溫的原理", correct:false, explain:"止血帶的原理是壓迫阻斷血流，與降溫無關。"}
+      ]},
+    {question:"為什麼止血帶使用時間與部位要清楚記錄並交班？",
+      choices:[
+        {text:"長時間阻斷肢體血流可能造成組織缺血壞死，醫院需要這個資訊評估後續處置與肢體存活風險", correct:true, explain:"這項資訊直接影響醫院的後續處置決策。"},
+        {text:"記錄時間只是行政程序，跟患者的醫療處置沒有關係", correct:false, explain:"這項記錄對後續醫療決策有實質重要性。"},
+        {text:"止血帶使用時間長短對組織完全沒有影響", correct:false, explain:"使用時間長短直接關係到肢體缺血的風險程度。"},
+        {text:"這項資訊只有在患者死亡時才需要用到", correct:false, explain:"這項資訊在患者存活時同樣、甚至更加重要。"}
+      ]}
+  ]},
+  {topic:"drowning", keywords:["溺水","drowning"], questions:[
+    {question:"溺水造成心跳停止的機轉，為什麼跟一般心因性心跳停止不完全相同？",
+      choices:[
+        {text:"溺水通常先造成缺氧（窒息性），心跳停止是缺氧惡化後的結果，而非心臟本身原發性的電氣異常", correct:true, explain:"這個差異也影響了溺水急救的處置順序建議。"},
+        {text:"溺水造成的心跳停止機轉與心肌梗塞完全相同，沒有任何差異", correct:false, explain:"兩者的起始機轉不同，一個源於缺氧、一個源於心臟本身。"},
+        {text:"溺水不會影響心臟功能，心跳停止另有原因", correct:false, explain:"缺氧惡化正是導致心跳停止的直接原因。"},
+        {text:"溺水造成心跳停止的唯一原因是水溫過低", correct:false, explain:"核心機轉是缺氧，水溫是另一個可能合併的因素。"}
+      ]},
+    {question:"為什麼溺水急救特別強調可以先給予人工呼吸，而非直接開始按壓？",
+      choices:[
+        {text:"溺水的核心問題是缺氧，優先給予幾口人工呼吸有助於盡快改善血氧，這與單純心因性停止的處置順序略有不同", correct:true, explain:"這是溺水急救與一般心因性停止在處置細節上的差異。"},
+        {text:"人工呼吸對溺水患者完全沒有幫助，只是傳統習慣做法", correct:false, explain:"人工呼吸對改善缺氧有直接幫助，並非只是習慣。"},
+        {text:"溺水患者一律不需要進行任何形式的人工呼吸", correct:false, explain:"人工呼吸正是溺水急救中重要的一環。"},
+        {text:"這個原則對所有類型的心跳停止都完全相同，沒有例外", correct:false, explain:"溺水這類缺氧性停止與一般心因性停止在細節上有差異。"}
+      ]}
+  ]},
+  {topic:"childbirth", keywords:["分娩","生產","childbirth","孕婦"], questions:[
+    {question:"分娩過程中子宮收縮的主要生理目的是什麼？",
+      choices:[
+        {text:"規律的子宮收縮幫助子宮頸擴張並推動胎兒下降，是分娩過程的正常生理機轉", correct:true, explain:"這是正常生產過程中必要的生理現象。"},
+        {text:"子宮收縮是一種異常現象，代表懷孕出現了併發症", correct:false, explain:"規律宮縮是正常生產過程的一部分，不代表併發症。"},
+        {text:"子宮收縮的唯一作用是讓產婦感到疼痛，對生產過程沒有實質幫助", correct:false, explain:"宮縮對胎兒娩出有實質的生理作用。"},
+        {text:"子宮收縮只會出現在早產的狀況，足月生產不會有這個現象", correct:false, explain:"足月生產同樣需要規律的子宮收縮。"}
+      ]},
+    {question:"為什麼新生兒出生後要特別注意保暖？",
+      choices:[
+        {text:"新生兒體表面積相對體重比例大、皮下脂肪少，體溫調節能力較差，容易快速散失體溫造成低體溫", correct:true, explain:"新生兒的生理特性讓保暖成為出生後的重要處置。"},
+        {text:"新生兒的體溫調節能力其實比成人更好，保暖只是習慣性做法", correct:false, explain:"新生兒的體溫調節能力其實較成人差。"},
+        {text:"保暖只是為了讓新生兒感到舒適，跟生理安全沒有關係", correct:false, explain:"保暖對新生兒的生理安全有實質重要性，不只是舒適度。"},
+        {text:"新生兒體溫不會受環境溫度影響", correct:false, explain:"新生兒的體溫其實很容易受環境溫度影響。"}
+      ]}
+  ]},
+  {topic:"spinal", keywords:["脊髓","脊椎","spinal"], questions:[
+    {question:"脊髓損傷造成肢體無力或癱瘓的機轉是什麼？",
+      choices:[
+        {text:"脊髓損傷會中斷神經訊號在腦部與身體之間的傳遞路徑，導致受傷平面以下的運動與感覺功能受影響", correct:true, explain:"這是脊髓損傷影響肢體功能的核心機轉。"},
+        {text:"脊髓損傷只會造成局部疼痛，不會影響肢體功能", correct:false, explain:"脊髓損傷可能嚴重影響運動與感覺功能，不只是疼痛。"},
+        {text:"肢體無力與脊髓損傷完全無關，通常是肌肉本身的問題", correct:false, explain:"脊髓損傷正是造成肢體無力的重要原因之一。"},
+        {text:"脊髓損傷的影響只會出現在受傷當下，之後會自動完全恢復", correct:false, explain:"脊髓損傷的影響可能持續，不一定會自動完全恢復。"}
+      ]},
+    {question:"為什麼懷疑脊椎損傷時要維持頭頸中立、避免不必要的移動？",
+      choices:[
+        {text:"不穩定的脊椎若受到額外移動，可能讓原本未完全斷裂的脊髓受到進一步的機械性損傷", correct:true, explain:"這是脊椎固定原則背後的核心考量。"},
+        {text:"維持中立姿勢只是為了讓患者感覺比較舒適，沒有醫學上的必要性", correct:false, explain:"這項原則有明確的醫學考量，不只是舒適度。"},
+        {text:"移動脊椎損傷患者對神經功能完全沒有影響", correct:false, explain:"不當移動可能造成神經功能進一步惡化。"},
+        {text:"這個原則只適用於已經完全癱瘓的患者", correct:false, explain:"即使尚未完全癱瘓，不當移動仍可能造成傷害惡化。"}
+      ]}
+  ]},
+  {topic:"fracture", keywords:["骨折","脫臼","fracture","扭傷","肩膀"], questions:[
+    {question:"骨折時患處腫脹、瘀青的原因是什麼？",
+      choices:[
+        {text:"骨折常合併周邊軟組織與血管損傷，造成局部出血與發炎反應，形成腫脹與瘀青", correct:true, explain:"這是骨折合併軟組織損傷的常見表現。"},
+        {text:"腫脹與瘀青單純是患者緊張造成的心理反應", correct:false, explain:"這是實質的組織損傷反應，不是心理因素。"},
+        {text:"只有開放性骨折才會有腫脹瘀青，閉合性骨折完全不會", correct:false, explain:"閉合性骨折同樣常見腫脹與瘀青。"},
+        {text:"腫脹瘀青與骨折本身沒有直接關聯，是巧合的皮膚問題", correct:false, explain:"這兩者與骨折造成的組織損傷有直接關聯。"}
+      ]},
+    {question:"為什麼骨折固定時要包含骨折處的上下兩個鄰近關節？",
+      choices:[
+        {text:"固定上下關節能有效限制骨折端的活動，減少移動過程中對周邊神經血管造成二次傷害的風險", correct:true, explain:"這是骨折固定的基本原則。"},
+        {text:"固定鄰近關節只是傳統習慣，對減少二次傷害沒有實質幫助", correct:false, explain:"這項原則有明確的生物力學考量，能有效減少二次傷害。"},
+        {text:"只固定骨折處本身效果會更好，固定鄰近關節反而有害", correct:false, explain:"只固定骨折處本身無法有效限制骨折端活動。"},
+        {text:"固定範圍大小與神經血管損傷風險完全無關", correct:false, explain:"固定範圍直接影響能否有效限制骨折端活動、降低損傷風險。"}
+      ]}
+  ]},
+  {topic:"altitude", keywords:["高山症","altitude"], questions:[
+    {question:"高山症的核心病理機轉與什麼有關？",
+      choices:[
+        {text:"海拔升高造成氣壓與氧分壓下降，身體來不及適應低氧環境，引發一系列生理反應與症狀", correct:true, explain:"這是高山症最核心的成因。"},
+        {text:"高山症主要是因為氣溫過低造成的凍傷反應", correct:false, explain:"高山症的核心問題是低氧適應不良，不是凍傷。"},
+        {text:"高山症與氧氣濃度變化完全無關，純粹是心理性的暈眩", correct:false, explain:"低氧環境正是高山症的核心生理誘因。"},
+        {text:"高山症只會影響視力，不會有其他全身性症狀", correct:false, explain:"高山症可能造成頭痛、噁心等多種全身性症狀。"}
+      ]},
+    {question:"為什麼嚴重高山症患者的處置原則是儘快下降高度？",
+      choices:[
+        {text:"下降高度能直接提高環境氧分壓，是逆轉缺氧相關病理變化最有效且直接的方法", correct:true, explain:"下降高度是治療嚴重高山症最根本有效的方式。"},
+        {text:"下降高度只是心理安慰效果，對生理狀況沒有實質幫助", correct:false, explain:"下降高度對改善缺氧有直接且重要的生理效果。"},
+        {text:"下降高度對嚴重高山症完全沒有幫助，只有藥物才有效", correct:false, explain:"下降高度是最直接有效的處置方式之一。"},
+        {text:"高度變化與高山症的嚴重程度沒有關聯", correct:false, explain:"海拔高度正是影響高山症嚴重程度的關鍵因素。"}
+      ]}
+  ]},
+  {topic:"decompression", keywords:["減壓病","潛水","decompression"], questions:[
+    {question:"潛水減壓病（潛水夫病）的核心病理機轉是什麼？",
+      choices:[
+        {text:"快速上升導致溶解在血液與組織中的氣體（主要是氮氣）形成氣泡，阻塞血管或壓迫組織造成傷害", correct:true, explain:"這是減壓病最核心的成因機轉。"},
+        {text:"減壓病單純是水壓造成的肌肉拉傷，跟氣體溶解無關", correct:false, explain:"核心機轉在體內氣體形成氣泡，不是肌肉拉傷。"},
+        {text:"減壓病只會影響皮膚，不會影響其他器官系統", correct:false, explain:"減壓病可能影響關節、神經系統等多個部位。"},
+        {text:"減壓病的成因與潛水深度或上升速度完全無關", correct:false, explain:"潛水深度與上升速度正是影響減壓病風險的關鍵因素。"}
+      ]},
+    {question:"為什麼疑似減壓病的患者，送醫途中要避免搭乘一般民航機或前往更高海拔？",
+      choices:[
+        {text:"海拔升高會讓環境壓力進一步降低，可能讓體內已形成的氣泡進一步擴大，使病情惡化", correct:true, explain:"這是減壓病後送特別強調避免升高海拔的原因。"},
+        {text:"搭乘飛機對減壓病患者完全沒有影響，這個顧慮沒有根據", correct:false, explain:"海拔升高對體內氣泡有實質且重要的影響。"},
+        {text:"這個原則只適用於已經完全康復的患者", correct:false, explain:"這個原則對急性期患者尤其重要。"},
+        {text:"海拔變化只會影響耳朵，不會影響減壓病的氣泡", correct:false, explain:"海拔變化會直接影響體內氣泡的大小。"}
+      ]}
+  ]},
+  {topic:"opioid", keywords:["鴉片","opioid","naloxone"], questions:[
+    {question:"鴉片類藥物過量造成呼吸抑制的機轉是什麼？",
+      choices:[
+        {text:"鴉片類藥物作用於腦幹呼吸中樞的受體，過量會抑制呼吸驅動，造成呼吸速率與深度明顯下降", correct:true, explain:"這是鴉片類藥物過量最致命的機轉。"},
+        {text:"鴉片類藥物過量只會影響意識，跟呼吸功能完全無關", correct:false, explain:"呼吸抑制正是鴉片類藥物過量最危險的表現。"},
+        {text:"呼吸抑制是身體對疼痛緩解的正常反應，不需要特別處理", correct:false, explain:"這是需要積極處置的危險徵象，不是正常反應。"},
+        {text:"鴉片類藥物只會影響心臟，不會影響呼吸中樞", correct:false, explain:"呼吸中樞正是鴉片類藥物作用的關鍵部位。"}
+      ]},
+    {question:"為什麼鴉片類拮抗劑（naloxone）使用後，患者仍需要持續密切觀察？",
+      choices:[
+        {text:"拮抗劑的作用時間可能短於原藥物，隨著拮抗劑效果消退，呼吸抑制可能再次出現", correct:true, explain:"這是拮抗劑使用後仍需持續監測的關鍵原因。"},
+        {text:"拮抗劑一旦起效，效果會持續到藥物完全代謝為止，不需要再觀察", correct:false, explain:"拮抗劑效果可能較短暫，症狀有復發的風險。"},
+        {text:"使用拮抗劑後呼吸功能會立即且永久恢復正常", correct:false, explain:"效果可能只是暫時的，需要持續監測。"},
+        {text:"拮抗劑對呼吸抑制沒有實質效果，只是安慰性處置", correct:false, explain:"拮抗劑對呼吸抑制有實質效果，但作用時間可能有限。"}
+      ]}
+  ]},
+  {topic:"hazmat", keywords:["化學品","hazmat","氣爆","洩漏"], questions:[
+    {question:"為什麼化學品洩漏現場要先區分污染區、緩衝區與安全區？",
+      choices:[
+        {text:"這樣的分區能避免未受過適當訓練與防護的人員暴露於危害中，同時避免污染物質擴散到需要救護的安全區域", correct:true, explain:"這是化學品事故現場管理的基本原則。"},
+        {text:"分區純粹是為了方便現場拍照記錄，對安全沒有實質意義", correct:false, explain:"分區對現場人員安全有實質且重要的意義。"},
+        {text:"只要戴上一般外科口罩，就可以直接進入污染區救援", correct:false, explain:"一般外科口罩無法提供化學品防護，貿然進入相當危險。"},
+        {text:"分區只是消防單位的習慣做法，救護人員不需要遵守", correct:false, explain:"救護人員同樣需要遵守分區原則以確保自身安全。"}
+      ]},
+    {question:"為什麼傷患送醫前可能需要先進行去污（decontamination）？",
+      choices:[
+        {text:"皮膚或衣物上殘留的化學物質可能持續造成傷害，也可能污染救護車、醫院與其他人員，去污能降低這些風險", correct:true, explain:"這是去污程序的核心目的。"},
+        {text:"去污只是為了保持救護車整潔，跟患者安全沒有關係", correct:false, explain:"去污對患者安全與避免交叉污染都有實質意義。"},
+        {text:"只要患者已經脫離污染源，就不需要再做任何去污處理", correct:false, explain:"殘留在皮膚或衣物上的物質仍可能持續造成傷害。"},
+        {text:"去污程序只適用於固體化學品，液體或氣體暴露不需要", correct:false, explain:"液體殘留同樣需要去污，以避免持續傷害與污染。"}
+      ]}
+  ]},
+  {topic:"triage", keywords:["檢傷","triage","大量傷患","start"], questions:[
+    {question:"大量傷患現場使用檢傷分類（如START）的核心目的是什麼？",
+      choices:[
+        {text:"在人力與資源有限的情況下，快速辨識出最需要立即處置、且有機會存活的傷患，讓資源發揮最大效益", correct:true, explain:"這是大量傷患檢傷分類的根本目的。"},
+        {text:"檢傷分類的目的是讓每位傷患都能得到完全相同的處置順序", correct:false, explain:"檢傷分類正是為了區分優先順序，不是讓每位患者處置順序相同。"},
+        {text:"檢傷分類只是行政記錄用途，不影響實際救護的優先順序", correct:false, explain:"檢傷分類直接決定現場救護資源分配的優先順序。"},
+        {text:"檢傷分類只適用於單一傷患的情境，大量傷患時不需要使用", correct:false, explain:"檢傷分類正是設計來因應大量傷患的情境。"}
+      ]},
+    {question:"為什麼同一位傷患的檢傷分類標籤，可能會隨著時間與後續評估而改變？",
+      choices:[
+        {text:"傷患的生理狀況可能隨時間惡化或改善，檢傷分類是動態評估，需要視情況重新分類，不是一次分類定終身", correct:true, explain:"檢傷分類本質上是持續且動態的評估過程。"},
+        {text:"檢傷分類標籤一旦決定，基於規定絕對不能更動", correct:false, explain:"實際上檢傷分類需要隨病情變化持續更新。"},
+        {text:"分類改變只會發生在傷患已經死亡的情況", correct:false, explain:"任何生理狀況的變化都可能導致重新分類。"},
+        {text:"重新分類只是形式上的程序，對實際處置沒有影響", correct:false, explain:"重新分類會直接影響後續的處置與送醫優先順序。"}
+      ]}
+  ]},
+  {topic:"head-injury", keywords:["腦震盪","頭部外傷","concussion","顱底骨折"], questions:[
+    {question:"腦震盪後可能出現的認知與記憶問題，背後的病理機轉大致是什麼？",
+      choices:[
+        {text:"頭部受到撞擊或加速減速力量，造成腦部短暫的功能性障礙（神經傳導與代謝異常），而不一定有明顯的結構性損傷", correct:true, explain:"腦震盪常是功能性而非結構性的損傷。"},
+        {text:"腦震盪一定會伴隨腦部結構的永久性損壞，才會有症狀出現", correct:false, explain:"多數腦震盪屬於功能性障礙，不一定有結構性損傷。"},
+        {text:"腦震盪的認知症狀單純是心理作用，跟腦部生理狀態無關", correct:false, explain:"這些症狀有實質的神經生理基礎，不是單純心理作用。"},
+        {text:"只有意識喪失超過數小時，才能稱為腦震盪", correct:false, explain:"腦震盪不一定合併意識喪失，短暫或無意識喪失也可能是腦震盪。"}
+      ]},
+    {question:"為什麼疑似腦震盪的患者，即使症狀當下看似緩解，仍建議避免立即恢復劇烈運動？",
+      choices:[
+        {text:"過早恢復劇烈活動可能增加二次腦傷的風險，且腦部可能仍處於尚未完全恢復的脆弱狀態", correct:true, explain:"這是運動醫學中「有疑慮就先讓他休息」原則的核心考量。"},
+        {text:"運動對腦震盪恢復完全沒有影響，這個顧慮沒有根據", correct:false, explain:"過早恢復劇烈運動確實有增加二次腦傷的風險。"},
+        {text:"只要沒有嘔吐症狀，就可以立即恢復任何強度的運動", correct:false, explain:"是否嘔吐不是唯一判斷依據，仍需完整評估。"},
+        {text:"這個原則只適用於職業運動員，一般人不需要遵守", correct:false, explain:"這個原則適用於所有疑似腦震盪的患者。"}
+      ]}
+  ]},
+  {topic:"cpr", keywords:["CPR","心肺復甦","AED","心跳停止","無反應成人"], questions:[
+    {question:"心跳停止後，為什麼胸部按壓的品質（深度、速率、減少中斷）對存活率影響很大？",
+      choices:[
+        {text:"有效的胸部按壓能產生足夠的人工血流，持續供應腦部與心臟氧氣，中斷或按壓不足會讓這個人工循環大幅下降", correct:true, explain:"按壓品質直接決定人工循環能提供多少灌流。"},
+        {text:"按壓品質只影響患者的舒適度，跟存活率沒有直接關係", correct:false, explain:"按壓品質是存活率的關鍵因素之一，不只是舒適度問題。"},
+        {text:"只要有壓就好，深度與速率對結果影響不大", correct:false, explain:"深度與速率不足會讓人工循環的效果大打折扣。"},
+        {text:"中斷按壓幾秒鐘完全不會影響腦部與心臟的血流", correct:false, explain:"即使短暫中斷，人工產生的血流也會迅速下降。"}
+      ]},
+    {question:"為什麼AED分析心律後，若建議電擊，要先確認「大家離手」？",
+      choices:[
+        {text:"電擊會釋放足夠電流通過身體以嘗試整流心律，若有人同時接觸患者，電流可能傳導到施救者身上造成傷害", correct:true, explain:"這是電擊安全程序中最基本也最重要的一步。"},
+        {text:"離手只是傳統禮貌性動作，電擊本身不會影響旁人", correct:false, explain:"電擊確實可能經由接觸傳導到旁人身上，離手是必要的安全程序。"},
+        {text:"離手是為了讓AED分析更準確，跟安全無關", correct:false, explain:"離手的主要目的是安全考量，不是分析準確度。"},
+        {text:"這個步驟只在教學情境需要，真實急救可以省略", correct:false, explain:"這是真實急救中同樣必要的安全步驟，不能省略。"}
+      ]}
+  ]},
+  {topic:"choking", keywords:["異物哽塞","choking","哽塞","哈姆立克","腹戳法"], questions:[
+    {question:"異物完全哽塞呼吸道時，為什麼病人往往無法說話或咳嗽？",
+      choices:[
+        {text:"完全阻塞代表空氣幾乎無法通過聲帶與氣道，發聲與有效咳嗽都需要足夠的氣流，因此病人反而異常安靜、只能用手勢表示", correct:true, explain:"這也是「完全哽塞」與「部分哽塞、還能咳嗽」的重要臨床區別。"},
+        {text:"病人說不出話只是因為過度緊張，跟氣道阻塞程度沒有關係", correct:false, explain:"說不出話、無法有效咳嗽是完全阻塞的重要徵象，不只是心理因素。"},
+        {text:"完全哽塞時病人通常還能正常咳嗽，只是聲音比較小", correct:false, explain:"完全哽塞時通常無法產生有效咳嗽，這點很重要。"},
+        {text:"能不能說話與氣道阻塞程度無關，純粹因人而異", correct:false, explain:"能否說話、咳嗽是評估阻塞程度的重要臨床依據。"}
+      ]},
+    {question:"腹戳法（哈姆立克法）能排除異物的原理是什麼？",
+      choices:[
+        {text:"瞬間對上腹部施力，推擠橫膈膜上抬，短暫提高胸腔內壓力，模擬強力咳嗽的效果將異物往外推出", correct:true, explain:"這個原理就是人為製造一次「強力咳嗽」。"},
+        {text:"腹戳法主要是讓病人分散注意力，異物會因此自然滑落", correct:false, explain:"腹戳法的效果來自瞬間壓力變化，不是分散注意力。"},
+        {text:"腹戳法的作用原理跟咳嗽完全無關，是另一種獨立機制", correct:false, explain:"腹戳法本質上是在模擬強力咳嗽的生理效果。"},
+        {text:"腹戳法主要透過震動讓異物鬆脫，跟腹內壓力無關", correct:false, explain:"核心機轉是瞬間提高胸腔內壓力，不是單純震動。"}
+      ]}
+  ]},
+  {topic:"button-battery", keywords:["鈕扣電池","電池","button-battery"], questions:[
+    {question:"鈕扣電池若卡在食道，為什麼可能在短時間內造成嚴重組織傷害？",
+      choices:[
+        {text:"電池接觸黏膜組織會產生電流，透過電解作用在周圍組織形成鹼性環境，可能在幾小時內造成食道灼傷甚至穿孔", correct:true, explain:"這正是鈕扣電池誤食被視為緊急狀況的原因，跟一般異物不同。"},
+        {text:"鈕扣電池的風險跟一般硬幣誤食完全相同，不需要特別緊急處理", correct:false, explain:"鈕扣電池會產生電解化學反應，風險遠高於一般異物。"},
+        {text:"電池只有在外殼破損漏液時才會造成傷害，完整電池完全安全", correct:false, explain:"即使外觀完整，電池接觸黏膜仍可能產生電解傷害。"},
+        {text:"這種傷害通常要數週才會發展成明顯症狀，不需要優先處理", correct:false, explain:"組織傷害可能在數小時內就快速惡化，需要儘速就醫。"}
+      ]}
+  ]},
+  {topic:"syncope", keywords:["暈厥","syncope","昏倒"], questions:[
+    {question:"暈厥（短暫昏倒後又清醒）的核心機轉大致是什麼？",
+      choices:[
+        {text:"腦部短暫供血或供氧不足，造成意識短暫喪失，原因可能來自心臟、血管迷走神經反射或姿勢性低血壓等多種機轉", correct:true, explain:"暈厥的根本問題都指向腦部短暫血流不足。"},
+        {text:"暈厥只是單純的心理性反應，跟腦部血流沒有關聯", correct:false, explain:"暈厥的核心機轉是腦部短暫血流不足，不是單純心理反應。"},
+        {text:"暈厥一定代表癲癇發作，兩者是同一件事", correct:false, explain:"暈厥與癲癇是不同的病理機轉，雖然表現上可能相似。"},
+        {text:"只要病人已經清醒、對答正常，就代表暈厥原因一定無害", correct:false, explain:"清醒後對答正常不能排除心因性等較危險的暈厥原因。"}
+      ]},
+    {question:"為什麼暈厥後已經恢復意識的患者，仍建議完整評估心臟相關病史與生命徵象？",
+      choices:[
+        {text:"某些心律不整或結構性心臟病造成的暈厥，發作間期可能完全正常，若不完整評估容易漏掉潛在的高風險病因", correct:true, explain:"心因性暈厥是相對少見但風險較高的一類原因，容易被忽略。"},
+        {text:"恢復意識就代表原因一定良性，完整評估只是形式上的程序", correct:false, explain:"恢復意識不能排除潛在的高風險心因性原因。"},
+        {text:"暈厥的原因一律相同，不需要區分良性或高風險族群", correct:false, explain:"暈厥的原因種類很多，風險程度差異很大，需要仔細評估。"},
+        {text:"心臟病史與暈厥完全無關，不需要特別詢問", correct:false, explain:"心臟病史是評估暈厥高風險原因的重要線索。"}
+      ]}
+  ]},
+  {topic:"abdominal", keywords:["腹痛","abdominal","腹部劇痛"], questions:[
+    {question:"急性腹痛病人出現「板狀腹」（腹部肌肉僵硬如板）可能代表什麼？",
+      choices:[
+        {text:"可能是腹膜炎的表現，腹腔內器官發炎或破裂刺激腹膜，造成反射性腹肌強直，是需要提高警覺的徵象", correct:true, explain:"板狀腹是腹膜刺激的典型表現，通常代表病情較嚴重。"},
+        {text:"這通常只是病人緊張、刻意用力造成的肌肉緊繃，沒有臨床意義", correct:false, explain:"板狀腹通常是反射性的腹膜刺激徵象，具有重要臨床意義。"},
+        {text:"板狀腹一定代表病人有運動習慣、腹肌本身比較發達", correct:false, explain:"這個徵象與腹肌鍛鍊程度無關，是病理性的反射反應。"},
+        {text:"這個徵象跟腹腔內器官狀況無關，純粹是皮膚表面問題", correct:false, explain:"板狀腹反映的是腹腔內部的發炎或刺激狀況。"}
+      ]}
+  ]},
+  {topic:"chest-trauma", keywords:["胸部外傷","胸部穿刺","鈍性胸部","blunt-chest","penetrating-chest"], questions:[
+    {question:"胸部外傷造成的氣胸，為什麼可能逐漸惡化成危及生命的張力性氣胸？",
+      choices:[
+        {text:"若傷口形成單向活瓣，空氣只能進入胸腔卻無法排出，胸腔內壓力持續累積，最終壓迫心臟與健側肺、影響靜脈回流", correct:true, explain:"這個持續累積的壓力正是張力性氣胸致命的原因。"},
+        {text:"氣胸的嚴重程度完全不會隨時間變化，一開始輕微就會一直輕微", correct:false, explain:"氣胸可能隨時間惡化，尤其在形成單向活瓣機轉時。"},
+        {text:"張力性氣胸的成因跟胸腔內壓力無關，純粹是疼痛加劇", correct:false, explain:"核心機轉是胸腔內壓力持續累積，不是單純疼痛加劇。"},
+        {text:"只有穿刺傷才可能造成氣胸，鈍性外傷不會有這個風險", correct:false, explain:"鈍性外傷同樣可能造成氣胸，例如肋骨骨折刺穿肺部。"}
+      ]}
+  ]},
+  {topic:"crush", keywords:["壓砸傷","擠壓傷","crush-injury","倒塌"], questions:[
+    {question:"長時間受壓的肢體在重物移除、血流恢復的瞬間，為什麼可能誘發致命的心律不整（擠壓症候群）？",
+      choices:[
+        {text:"缺血的肌肉細胞持續分解，鉀離子與肌紅蛋白堆積在組織中；血流一旦恢復，這些物質大量回流全身，可能誘發高血鉀", correct:true, explain:"這正是擠壓症候群又稱「smiling death」的病理機轉。"},
+        {text:"這個風險只是理論上的顧慮，實際救護現場幾乎不會發生這種情況", correct:false, explain:"這是真實且重要的臨床風險，是壓砸傷處置需要謹慎協調的原因。"},
+        {text:"移除重物對受壓肢體的循環完全沒有影響，可以隨時直接進行", correct:false, explain:"移除重物的時機與準備需要謹慎協調，因為血流恢復可能誘發嚴重併發症。"},
+        {text:"這個現象只會影響受壓的局部肢體，完全不會波及全身循環", correct:false, explain:"堆積的代謝產物會隨血流回到全身循環，可能造成全身性影響。"}
+      ]}
+  ]},
+  {topic:"electrical", keywords:["電線","觸電","electrical","漏電"], questions:[
+    {question:"電擊傷造成心跳停止或心律不整的機轉是什麼？",
+      choices:[
+        {text:"電流通過身體時可能直接干擾心臟正常的電生理活動，誘發致命性心律不整，即使體表傷口看起來不大", correct:true, explain:"這是電擊傷特別強調要留意心臟監測的原因。"},
+        {text:"電擊傷對心臟完全沒有影響，危險性只來自皮膚灼傷", correct:false, explain:"電流對心臟電生理活動的直接影響，往往比體表灼傷更危險。"},
+        {text:"只有體表灼傷範圍很大時，才需要擔心心臟受到影響", correct:false, explain:"即使體表傷口不大，電流通過路徑仍可能嚴重影響心臟。"},
+        {text:"電擊傷造成的風險只會在觸電當下出現，之後完全不需要觀察", correct:false, explain:"電擊傷後仍可能延遲出現心律不整，需要持續監測。"}
+      ]}
+  ]}
+];
+function matchPathophysQuestions(sc){
+  const haystack = `${sc.id} ${sc.title} ${sc.summary}`;
+  const scored = PATHOPHYS_BANK.map(topicEntry=>{
+    const score = topicEntry.keywords.reduce((n,kw)=> n + (haystack.includes(kw) ? 1 : 0), 0);
+    return {topicEntry, score};
+  }).filter(t=>t.score>0).sort((a,b)=> b.score - a.score);
+  if(scored.length===0) return [];
+  const picked = scored.slice(0,2).flatMap(t=>t.topicEntry.questions);
+  return picked.slice(0,3);
+}
+
 /* 建立整體印象小遊戲的器材庫：依部位分組，每組包含跟情境有關/無關的項目，
    預設結果文字是中性描述，個別情境可用 giFindings 覆寫成該案例的實際發現 */
 const GI_ITEM_POOL = {
@@ -266,6 +802,11 @@ const STORAGE_KEY = "emt1_practice_stats_v3";
 function loadStats(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; } }
 function saveStats(stats){ localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); }
 
+/* ===================== 疑問筆記（跟現場筆記側欄是不同功能） ===================== */
+const QUESTION_NOTES_KEY = "emt1_practice_notes_v1";
+function loadQuestionNotes(){ try{ return JSON.parse(localStorage.getItem(QUESTION_NOTES_KEY)) || []; }catch(e){ return []; } }
+function saveQuestionNotes(notes){ localStorage.setItem(QUESTION_NOTES_KEY, JSON.stringify(notes)); }
+
 /* ===================== menu ===================== */
 const filterBar = document.getElementById("filterBar");
 const scenarioGrid = document.getElementById("scenarioGrid");
@@ -351,6 +892,7 @@ function showHome(){
   document.getElementById("commandListScreen").classList.add("hidden");
   document.getElementById("commandPlayScreen").classList.add("hidden");
   document.getElementById("commandResultScreen").classList.add("hidden");
+  document.getElementById("notesListScreen").classList.add("hidden");
 }
 function showPracticeMenu(){
   homeScreen.classList.add("hidden");
@@ -366,7 +908,7 @@ function showReference(){
 }
 document.getElementById("goPracticeBtn").onclick = showPracticeMenu;
 const goReferenceBtn = document.getElementById("goReferenceBtn");
-if(goReferenceBtn) goReferenceBtn.onclick = showReference;
+if(goReferenceBtn) goReferenceBtn.onclick = (e)=>{ e.preventDefault(); showReference(); };
 document.getElementById("homeFromMenuBtn").onclick = showHome;
 
 function renderReferencePage(){
@@ -522,6 +1064,14 @@ function renderNotes(){
 function renderStep(){
   const sc = state.scenario;
   const step = sc.steps[state.stepIndex];
+  /* 隨機突發狀況：有 randomChance 的步驟不是每次都會出現，沒抽中就直接跳到下一步，
+     不計入步數、不留下任何痕跡，讓同一個情境重玩時體感不完全一樣。 */
+  if(step && typeof step.randomChance==="number" && Math.random() > step.randomChance){
+    const idx = resolveNextIndex();
+    if(idx >= 0){ state.stepIndex = idx; renderStep(); }
+    else { finishScenario(); }
+    return;
+  }
   document.body.classList.remove("emergency-active");
   if(state.emergencyTimer){
     clearInterval(state.emergencyTimer);
@@ -540,6 +1090,11 @@ function renderStep(){
   state.monitorChecked = [];
   state.gcsOpen = false;
   state.gcsSelected = {e:null, v:null, m:null};
+
+  const noteInput = document.getElementById("stepNoteInput");
+  if(noteInput) noteInput.value = "";
+  const noteSavedMsg = document.getElementById("stepNoteSavedMsg");
+  if(noteSavedMsg) noteSavedMsg.classList.add("hidden");
 
   document.getElementById("stepLabel").textContent = mysteryMode ? "神秘案例" : sc.title;
   document.getElementById("stepCounter").textContent = `第 ${state.stepIndex+1} / ${sc.steps.length} 步`;
@@ -916,6 +1471,104 @@ document.getElementById("giCancelBtn").onclick = ()=>{
   document.getElementById("giModal").classList.remove("open");
 };
 
+/* ===================== SAMPLE 病史詢問小遊戲 ===================== */
+function openSampleModal(){
+  state.sampleAsked = {};
+  state.samplePicks = {};
+  renderSampleCategoryList();
+  document.getElementById("sampleModal").classList.add("open");
+}
+function sampleAnswerFor(key){
+  const step = state.scenario.steps[state.stepIndex];
+  const perCat = step.correct.sampleFindings && step.correct.sampleFindings[key];
+  if(perCat) return perCat;
+  if(step.correct.reading) return step.correct.reading;
+  return "先繼續問完其他類別，最後會一起整理這次問到的病史。";
+}
+function renderSampleCategoryList(){
+  const wrap = document.getElementById("sampleCategoryList");
+  wrap.innerHTML = "";
+  SAMPLE_QUESTION_BANK.forEach(cat=>{
+    const row = document.createElement("div");
+    row.className = "gi-item-row" + (state.sampleAsked[cat.key] ? " viewed" : "");
+    if(state.sampleAsked[cat.key]){
+      const picked = cat.questions[state.samplePicks[cat.key]];
+      row.innerHTML = `
+        <div style="font-weight:700;">${cat.letter}－${cat.label}</div>
+        <div class="triage-check-found" style="margin-top:6px;"><b>你問：</b>${picked.text}</div>
+        <div class="gi-item-result">${picked.correct ? "✔ 開放式問法，資訊比較完整。" : "💡 " + picked.note}</div>
+        <div class="gi-item-result" style="border-top:1px dashed var(--border);margin-top:6px;padding-top:6px;">📟 ${sampleAnswerFor(cat.key)}</div>`;
+    } else {
+      const btns = cat.questions.map((q,i)=>
+        `<button class="triage-check-btn" data-cat="${cat.key}" data-idx="${i}" style="display:block;width:100%;margin-bottom:6px;">▶ ${q.text}</button>`
+      ).join("");
+      row.innerHTML = `<div style="font-weight:700;margin-bottom:6px;">${cat.letter}－${cat.label}</div>${btns}`;
+    }
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll(".triage-check-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      state.sampleAsked[btn.dataset.cat] = true;
+      state.samplePicks[btn.dataset.cat] = Number(btn.dataset.idx);
+      renderSampleCategoryList();
+    };
+  });
+  const allAsked = SAMPLE_QUESTION_BANK.every(cat=> state.sampleAsked[cat.key]);
+  document.getElementById("sampleConfirmBtn").disabled = !allAsked;
+}
+document.getElementById("sampleConfirmBtn").onclick = ()=>{
+  document.getElementById("sampleModal").classList.remove("open");
+  const goodCount = SAMPLE_QUESTION_BANK.filter(cat=> cat.questions[state.samplePicks[cat.key]].correct).length;
+  const note = `這輪病史詢問，6類中有${goodCount}類選到比較開放、完整的問法。`;
+  evaluateAction("history","patient",{simSummary: note});
+};
+document.getElementById("sampleCancelBtn").onclick = ()=>{
+  document.getElementById("sampleModal").classList.remove("open");
+};
+
+/* ===================== 送醫交班小遊戲 ===================== */
+function openHandoverModal(){
+  state.handoverChecked = new Set();
+  renderHandoverList();
+  document.getElementById("handoverWarning").classList.add("hidden");
+  document.getElementById("handoverModal").classList.add("open");
+}
+function renderHandoverList(){
+  const wrap = document.getElementById("handoverItemsList");
+  wrap.innerHTML = "";
+  HANDOVER_CHECKLIST.forEach(item=>{
+    const checked = state.handoverChecked.has(item.id);
+    const row = document.createElement("label");
+    row.className = "handover-item" + (checked ? " checked" : "");
+    row.innerHTML = `<input type="checkbox" ${checked?"checked":""}> <span>${item.label}</span>`;
+    row.querySelector("input").onchange = (e)=>{
+      if(e.target.checked) state.handoverChecked.add(item.id);
+      else state.handoverChecked.delete(item.id);
+      renderHandoverList();
+    };
+    wrap.appendChild(row);
+  });
+}
+document.getElementById("handoverConfirmBtn").onclick = ()=>{
+  const missing = HANDOVER_CHECKLIST.filter(i=> i.relevant && !state.handoverChecked.has(i.id));
+  const warning = document.getElementById("handoverWarning");
+  if(missing.length > 0){
+    warning.textContent = `⚠️ 還有交班核心重點沒有勾選：${missing.map(i=>i.label).join("、")}`;
+    warning.className = "cpr-hit-feedback off";
+    warning.classList.remove("hidden");
+    return;
+  }
+  document.getElementById("handoverModal").classList.remove("open");
+  const extra = HANDOVER_CHECKLIST.filter(i=> !i.relevant && state.handoverChecked.has(i.id));
+  const note = extra.length>0
+    ? `這次交班也提到了一些比較不是重點的內容（${extra.map(i=>i.label).join("、")}），真實交班時間有限，建議更聚焦在核心重點。`
+    : "核心重點都有涵蓋到，交班內容很完整、也沒有花時間在不必要的細節上。";
+  evaluateAction("handoverReport","scene",{simSummary: note});
+};
+document.getElementById("handoverCancelBtn").onclick = ()=>{
+  document.getElementById("handoverModal").classList.remove("open");
+};
+
 function renderMonitorPanel(){
   const wrap = document.getElementById("monitorChecklist");
   wrap.innerHTML = "";
@@ -950,6 +1603,14 @@ function onToolClick(tool){
     state.gcsHintOn = false;
     renderGcsPanel();
     document.getElementById("gcsModal").classList.add("open");
+    return;
+  }
+  if(tool.id==="history"){
+    openSampleModal();
+    return;
+  }
+  if(tool.id==="handoverReport"){
+    openHandoverModal();
     return;
   }
   if(tool.id==="generalImpression"){
@@ -1126,7 +1787,8 @@ function evaluateAction(toolId, target, meta){
         reading: step.correct.reading, explain: step.correct.explain
       });
       addNote("reading", `📟 ${toolLabel(toolId)}：${step.correct.reading}`);
-      showReadingAndNext(step.correct.reading);
+      const simNote = meta && meta.simSummary ? (`<br><br>${meta.simSummary}`) : "";
+      showReadingAndNext(step.correct.reading + simNote);
     } else {
       const extra = meta && meta.simSummary ? ("\n\n" + meta.simSummary) : "";
       showFeedbackAndNext(true, step.correct.explain + extra);
@@ -1969,7 +2631,7 @@ function showFeedbackOnly(good, text){
 
 function showReadingAndNext(reading){
   const feedbackArea = document.getElementById("feedbackArea");
-  feedbackArea.innerHTML = `<div class="feedback-box reading"><div class="fb-title">📟 測得數值</div><div>${reading}</div><div style="margin-top:6px;font-size:0.78rem;opacity:0.85;">這代表什麼、正常與否，先自己想想——情境結束後會附上完整解讀。</div></div>`;
+  feedbackArea.innerHTML = `<div class="feedback-box reading"><div class="fb-title">📟 測得數值</div><div>${reading}</div><div style="margin-top:6px;font-size:0.78rem;opacity:0.85;">完整解讀會併入情境結束後的「生命徵象數值回顧」。</div></div>`;
   addNextButton();
   scrollFeedbackIntoView();
 }
@@ -2014,6 +2676,50 @@ function advance(){
   }
 }
 
+function renderPathophysBox(sc){
+  const box = document.getElementById("pathophysBox");
+  const questions = matchPathophysQuestions(sc);
+  if(questions.length===0){
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  box.innerHTML = `<h3>🧪 延伸知識挑戰</h3><p>跟這個情境主題相關的病理生理問題，不計入情境分數，純粹延伸學習用。</p>`;
+  questions.forEach((q, qi)=>{
+    const qDiv = document.createElement("div");
+    qDiv.className = "pathophys-q";
+    qDiv.innerHTML = `<div class="pq-text">${q.question}</div><div class="choices"></div>`;
+    const choicesBox = qDiv.querySelector(".choices");
+    const shuffled = q.choices.map((c,i)=>({...c, origIndex:i}));
+    for(let i=shuffled.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [shuffled[i],shuffled[j]] = [shuffled[j],shuffled[i]];
+    }
+    shuffled.forEach((choice, idx)=>{
+      const btn = document.createElement("button");
+      btn.className = "choice-btn";
+      btn.innerHTML = `<span class="key">${idx+1}</span><span>${choice.text}</span>`;
+      btn.onclick = ()=>{
+        Array.from(choicesBox.children).forEach(b=> b.disabled = true);
+        if(choice.correct){
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("incorrect");
+          const correctText = q.choices.find(c=>c.correct).text;
+          Array.from(choicesBox.children).forEach(b=>{ if(b.textContent.includes(correctText)) b.classList.add("reveal-correct"); });
+        }
+        const note = document.createElement("div");
+        note.className = "gi-item-result";
+        note.textContent = choice.explain;
+        qDiv.appendChild(note);
+      };
+      choicesBox.appendChild(btn);
+    });
+    box.appendChild(qDiv);
+  });
+  box.classList.remove("hidden");
+}
+
 function finishScenario(){
   document.onkeydown = null;
   const sc = state.scenario;
@@ -2050,6 +2756,8 @@ function finishScenario(){
       <p><a href="${sc.realCase.source}" target="_blank" rel="noopener noreferrer">查看來源網站</a></p>`;
     realCaseBox.classList.remove("hidden");
   }
+
+  renderPathophysBox(sc);
 
   if(state.readingsLog.length>0){
     const heading = document.createElement("div");
@@ -2097,6 +2805,97 @@ document.getElementById("toMenuBtn").onclick = ()=>{
   renderMenu();
 };
 document.getElementById("replayBtn").onclick = ()=> startScenario(state.scenario.id);
+
+/* ===================== 疑問筆記：存、列表、匯出 ===================== */
+document.getElementById("stepNoteSaveBtn").onclick = ()=>{
+  const input = document.getElementById("stepNoteInput");
+  const text = input.value.trim();
+  if(!text) return;
+  const sc = state.scenario;
+  const step = sc.steps[state.stepIndex];
+  const questionText = step.type==="action" ? step.prompt : step.question;
+  const answerText = step.type==="action"
+    ? `${toolLabel(step.correct.tool)} → ${targetLabel(Array.isArray(step.correct.target)?step.correct.target[0]:step.correct.target)}${step.correct.explain ? "："+step.correct.explain : ""}`
+    : (step.choices.find(c=>c.correct) ? `${step.choices.find(c=>c.correct).text}${step.choices.find(c=>c.correct).explain ? "："+step.choices.find(c=>c.correct).explain : ""}` : "");
+  const notes = loadQuestionNotes();
+  notes.push({
+    id: Date.now(),
+    scenarioId: sc.id,
+    scenarioTitle: sc.title,
+    category: sc.category,
+    stepIndex: state.stepIndex,
+    scene: step.scene,
+    question: questionText,
+    answer: answerText,
+    doubt: text,
+    savedAt: new Date().toISOString()
+  });
+  saveQuestionNotes(notes);
+  input.value = "";
+  document.getElementById("stepNoteSavedMsg").classList.remove("hidden");
+};
+
+function formatNoteDate(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function renderNotesList(){
+  const notes = loadQuestionNotes();
+  const box = document.getElementById("notesListBox");
+  if(notes.length===0){
+    box.innerHTML = `<div class="empty-msg">還沒有存下任何疑問，練習中看到題目下方的「儲存疑問」欄位就可以記錄。</div>`;
+    return;
+  }
+  const toolbar = `<div class="notes-toolbar">
+      <button class="btn btn-primary" id="exportNotesBtn">⬇ 匯出全部疑問（文字檔）</button>
+      <button class="btn btn-outline" id="clearNotesBtn">🗑 清空全部</button>
+    </div>`;
+  const items = notes.slice().reverse().map(n=>`
+    <div class="note-item" data-id="${n.id}">
+      <div class="note-meta">${formatNoteDate(n.savedAt)}　${mysteryMode ? "神秘案例" : n.scenarioTitle}（分類：${CATEGORY_LABELS[n.category]||n.category}）</div>
+      <div class="note-context">Q：${n.question}</div>
+      <div class="note-text">${n.doubt}</div>
+      <button class="btn btn-outline note-delete-btn" data-id="${n.id}">刪除這則</button>
+    </div>`).join("");
+  box.innerHTML = toolbar + items;
+  box.querySelectorAll(".note-delete-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = Number(btn.dataset.id);
+      saveQuestionNotes(loadQuestionNotes().filter(n=>n.id!==id));
+      renderNotesList();
+    };
+  });
+  document.getElementById("clearNotesBtn").onclick = ()=>{
+    if(confirm("確定要清空所有存下的疑問嗎？這個動作無法復原。")){
+      saveQuestionNotes([]);
+      renderNotesList();
+    }
+  };
+  document.getElementById("exportNotesBtn").onclick = ()=>{
+    const lines = notes.map((n,i)=>
+      `【${i+1}】${formatNoteDate(n.savedAt)}\n情境：${n.scenarioTitle}（分類：${CATEGORY_LABELS[n.category]||n.category}）\n情境描述：${n.scene}\n題目：${n.question}\n正確答案／解釋：${n.answer}\n我的疑問：${n.doubt}\n`
+    ).join("\n----------------------------------------\n\n");
+    const header = `EMT1 情境複習遊戲・我的疑問筆記匯出\n匯出時間：${formatNoteDate(new Date().toISOString())}\n共 ${notes.length} 則疑問\n\n可以把這份檔案整份貼給 AI，請它幫忙針對下面每一則疑問逐一解釋或補充說明。\n\n========================================\n\n`;
+    const blob = new Blob([header + lines], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `emt1-疑問筆記-${new Date().toISOString().slice(0,10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+}
+document.getElementById("goNotesBtn").onclick = ()=>{
+  homeScreen.classList.add("hidden");
+  document.getElementById("notesListScreen").classList.remove("hidden");
+  renderNotesList();
+};
+document.getElementById("homeFromNotesListBtn").onclick = ()=>{
+  document.getElementById("notesListScreen").classList.add("hidden");
+  showHome();
+};
 
 /* ===================== cheat sheet & stats reset ===================== */
 const cheatModal = document.getElementById("cheatModal");
@@ -2478,7 +3277,8 @@ document.getElementById("triageSubmitBtn").onclick = ()=>{
   updateTriageTimer();
 };
 const goTriageBtn = document.getElementById("goTriageBtn");
-if(goTriageBtn) goTriageBtn.onclick = ()=>{
+if(goTriageBtn) goTriageBtn.onclick = (e)=>{
+  e.preventDefault();
   homeScreen.classList.add("hidden");
   document.getElementById("triageListScreen").classList.remove("hidden");
   renderTriageList();
@@ -2742,7 +3542,8 @@ function finishCommand(){
   list.appendChild(eventSummary);
 }
 const goCommandBtn = document.getElementById("goCommandBtn");
-if(goCommandBtn) goCommandBtn.onclick = ()=>{
+if(goCommandBtn) goCommandBtn.onclick = (e)=>{
+  e.preventDefault();
   homeScreen.classList.add("hidden");
   document.getElementById("commandListScreen").classList.remove("hidden");
   renderCommandList();

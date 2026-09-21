@@ -210,6 +210,29 @@
   .real-case-box h3{margin:0 0 6px;color:#146c5b;font-size:0.95rem;}
   .real-case-box p{margin:5px 0;}
   .real-case-box a{color:#146c5b;font-weight:700;word-break:break-word;}
+  .pathophys-box{margin-top:18px;padding:14px;text-align:left;background:#f5f0fb;border:1px solid #d9c6ef;border-radius:10px;font-size:0.85rem;}
+  .pathophys-box h3{margin:0 0 4px;color:#5b3a91;font-size:0.95rem;}
+  .pathophys-box>p{margin:0 0 12px;color:var(--muted);font-size:0.8rem;}
+  .pathophys-q{margin-top:14px;}
+  .pathophys-q:first-of-type{margin-top:0;}
+  .pathophys-q .pq-text{font-weight:700;margin-bottom:8px;}
+  .pathophys-q .choices{gap:8px;}
+  .pathophys-q .choice-btn{font-size:0.84rem;padding:9px 12px;}
+  .note-box{margin-top:16px;padding:12px 14px;background:#fffaf0;border:1px solid #f0dca8;border-radius:10px;text-align:left;}
+  .note-label{display:block;font-size:0.8rem;color:#8a6d1d;font-weight:700;margin-bottom:6px;}
+  .note-box textarea{width:100%;box-sizing:border-box;resize:vertical;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-family:inherit;}
+  .note-actions{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+  .note-saved-msg{font-size:0.78rem;color:#146c5b;font-weight:700;}
+  .note-item{text-align:left;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+  .note-item .note-meta{font-size:0.76rem;color:var(--muted);margin-bottom:4px;}
+  .note-item .note-context{font-size:0.82rem;color:var(--navy);font-weight:700;margin-bottom:4px;}
+  .note-item .note-text{font-size:0.86rem;white-space:pre-line;margin-bottom:8px;}
+  .note-item .note-delete-btn{font-size:0.76rem;padding:4px 10px;}
+  .notes-toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .handover-item{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer;}
+  .handover-item input{margin-top:2px;flex-shrink:0;}
+  .handover-item.checked{background:#f0f9f4;border-color:var(--green);}
+  .handover-item span{font-size:0.85rem;}
   .section-heading{margin-top:18px;font-weight:700;text-align:left;}
   .result-actions{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
   /* ---- modal ---- */

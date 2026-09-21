@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-ectopic-pregnancy", category:"special", difficulty:3,
+  title:"下腹痛合併頭暈的年輕女性",
+  summary:"育齡女性下腹突然劇痛合併頭暈冒冷汗，練習辨識婦科急症合併休克的警訊。",
+  steps:[
+    {type:"action", scene:"你到達時，一名28歲女性蜷縮在沙發上，表示右下腹突然劇痛，臉色蒼白，朋友在旁邊扶著她。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:distress","patient:skinColor"],
+        giFindings:{
+          "patient:distress":"蜷曲著身體，表情因劇痛而扭曲，講話有點喘",
+          "patient:skinColor":"臉色蒼白，額頭與手心都在冒冷汗"
+        },
+        explain:"建立整體印象，觀察她的姿勢、表情與膚色，這些都是判斷嚴重度的重要線索。"},
+      mistakes:[]},
+    {type:"action", scene:"你靠近她，準備測量生命徵象。",
+      prompt:"你會做什麼？",
+      correct:{tool:"bloodPressure",target:"leftArm",altTargets:["rightArm"],
+        reading:"88/56 mmHg，脈搏 118次/分",
+        explain:"血壓偏低、心跳偏快，這樣的組合在年輕、平常健康的病人身上，可能比表面看起來更嚴重，是早期休克代償的表現。"},
+      mistakes:[]},
+    {type:"choice", scene:"你想進一步了解病史，朋友把你拉到旁邊小聲說：「她最近月經來的時間有點亂，我不確定她自己知不知道原因。」",
+      question:"這個資訊對你判斷病情有什麼重要性？",
+      choices:[
+        {text:"育齡女性出現下腹痛合併休克徵象時，即使沒有明顯陰道大出血，仍必須將子宮外孕等婦科急症列入優先考量，儘速送醫", correct:true, explain:"子宮外孕的內出血通常在腹腔內，不一定會從陰道大量流出，容易被現場忽略，是育齡女性下腹痛合併休克時的重要警訊。"},
+        {text:"月經不規則跟現在的腹痛沒有關係，這項資訊可以完全忽略", correct:false, explain:"月經史對育齡女性的下腹痛評估非常關鍵，不應該忽略。"},
+        {text:"只要沒有看到陰道大量出血，就可以排除婦科方面的嚴重問題", correct:false, explain:"子宮外孕等內出血可能完全發生在腹腔內，外觀不一定看得到大出血。"},
+        {text:"她還年輕、看起來身體底子好，這樣的血壓數字不需要太緊張", correct:false, explain:"年輕健康的人代償能力較好，血壓數字看似不算太低時，可能已經是相對嚴重的失血狀態。"}
+      ]},
+    {type:"action", scene:"你決定進一步詢問病史。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"history",target:"patient",
+        reading:"她表示最後一次月經大約六週前，這幾天開始有輕微不正常出血，之前沒有這樣劇烈的腹痛",
+        explain:"詢問最後一次月經時間與相關症狀，是評估育齡女性腹痛時重要且應該常規詢問的資訊。"},
+      mistakes:[]},
+    {type:"action", scene:"考量她可能有內出血與休克徵象。",
+      prompt:"你會協助她採取什麼姿勢？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"supineLegsRaised"},
+        explain:"懷疑休克時，平躺並抬高下肢有助於增加回心血流量，是休克姿勢的基本處置原則。"},
+      mistakes:[]},
+    {type:"action", scene:"擺位後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"疑似內出血休克的病人應給予高濃度氧氣支持，並儘速送醫評估。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時應說明月經史、疑似懷孕的可能性、休克徵象與生命徵象變化，這些資訊對醫院判斷是否為子宮外孕等婦科急症非常關鍵。"},
+      mistakes:[]}
+  ]
+});

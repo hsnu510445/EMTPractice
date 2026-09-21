@@ -12,7 +12,7 @@ SCENARIOS.push({
     {type:"action", scene:"患者仍能回答問題，但開始說自己有點噁心。",
       prompt:"你會評估什麼？",
       correct:{tool:"gcsCheck",target:"patient",gcsSpec:{e:4,v:4,m:6},reading:"GCS 14（E4 V4 M6），患者回答稍混亂",explain:"頭部外傷後應評估意識程度並注意是否出現變化。"},mistakes:[]},
-    {type:"action", scene:"你發現他鼻腔有明顯滲血，且耳後與鼻樑附近有瘀青，思考是否可能有顱底骨折。",
+    {type:"action", scene:"你發現他鼻腔有明顯滲血，且耳後與雙眼眼眶周圍都有瘀青，思考是否可能有顱底骨折。",
       prompt:"如果此時他意識變差、呼吸道變得不通暢，你最適合放哪種呼吸道輔助？",
       correct:{tool:"oralAirway",target:"head",explain:"懷疑顱底骨折時絕對不能放置鼻咽氣道（NPA），因為鼻腔插入可能加重顱腦損傷；此時應改用口咽氣道（OPA）維持上氣道通暢。"},
       mistakes:[{tool:"nasalAirway",target:"head",explain:"顱底骨折時禁用鼻咽氣道（NPA）；鼻腔插入可能造成更嚴重的顱內損傷與腦膜破裂風險。", nasalAirwayForbidden:true}]},

@@ -9,14 +9,10 @@ SCENARIOS.push({
     {type:"action", scene:"患者躺在池畔，對聲音沒有反應。",
       prompt:"你會先確認什麼？",
       correct:{tool:"verbalCheck",target:"patient",explain:"確認患者是否有反應並立即進入後續初步評估。"},mistakes:[]},
-    {type:"action", scene:"患者沒有正常反應，胸廓沒有正常呼吸起伏。",
-      prompt:"此時？",
-      correct:{tool:"cpr",target:"chest",explain:"無反應且沒有正常呼吸時應立即開始CPR，並盡快取得AED。"},mistakes:[]},
-    {type:"action", scene:"旁人已拿來AED。",
-      prompt:"你會做什麼？",
-      correct:{tool:"cpr",target:"chest",explain:"持續依CPR流程進行，並配合AED分析與後續指示，盡量減少中斷按壓的時間。"},mistakes:[]},
-    {type:"action", scene:"AED完成分析後。",
-      prompt:"接下來？",
-      correct:{tool:"ongoingMonitor",target:"patient",explain:"依AED與CPR流程持續處置，並持續觀察患者是否恢復正常呼吸與循環。"},mistakes:[]}
+    {type:"action", scene:"患者沒有正常反應，胸廓沒有正常呼吸起伏，旁人正在通報並找AED過來。",
+      prompt:"你會怎麼做？",
+      cprSim:true,
+      correct:{tool:"cpr",target:"chest",explain:"溺水造成的心跳停止主要是缺氧引起，與一般心因性停止不同，指引建議可先給予幾口人工呼吸再開始按壓；AED到場後依指示分析、必要時電擊，電擊或分析後應立即恢復按壓，不要因為觀察而中斷太久。"},
+      mistakes:[]}
   ]
 });

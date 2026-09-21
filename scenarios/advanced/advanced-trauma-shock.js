@@ -2,7 +2,6 @@ SCENARIOS.push({
   id:"advanced-trauma-shock", category:"advanced", difficulty:3,
   title:"車禍後越來越安靜的患者",
   summary:"高級救護練習：辨識隱性出血與失血性休克，練習保暖、快速後送與進階處置界線。",
-  realCase:{title:"高級救護教材主題：創傷休克",summary:"本題強調高能量機轉、早期休克徵象、保暖與快速後送的整合判斷。",learningPoint:"正常或接近正常的早期數值不能排除嚴重失血；要看整體趨勢、皮膚、意識與機轉，並避免現場延誤。",source:"reference/高級救護技術員教科書.pdf"},
   steps:[
     {type:"action",scene:"小客車撞上護欄，車內患者已由消防人員協助脫困，路旁仍有來車快速通過。",prompt:"接近前先做什麼？",correct:{tool:"sceneCheck",target:"scene",explain:"先確認交通、車輛與現場管制，必要時等待其他單位完成安全警戒。"},mistakes:[]},
     {type:"action",scene:"患者清醒但臉色蒼白，腹部與骨盆疼痛，沒有看到大量外出血。",prompt:"初步評估要特別注意什麼？",correct:{tool:"generalImpression",target:"patient",explain:"高能量機轉加上蒼白、腹盆腔疼痛，即使沒有外出血，也要高度警覺內出血與休克。"},mistakes:[]},

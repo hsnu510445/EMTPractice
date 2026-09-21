@@ -21,6 +21,15 @@ SCENARIOS.push({
       prompt:"這些徵象讓你懷疑中風，你該使用什麼工具快速評估？",
       correct:{tool:"fastStrokeCheck",target:"head",explain:"臉部下垂、單側肢體無力、言語不清是典型中風徵象，FAST是常用的快速篩檢工具。"},
       mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.4,
+      scene:"評估過程中，阿公忽然變得躁動，一直想從椅子上站起來，嘴裡含糊喊著要去廁所。",
+      question:"你會怎麼處理？",
+      choices:[
+        {text:"溫和但堅定地請他先不要自己站起來，說明他現在單側肢體無力容易跌倒，協助他留在原地並請家屬一起幫忙安撫", correct:true, explain:"單側肢體無力合併意識改變的患者自行站立跌倒風險很高，應以溫和堅定的態度制止並就地安撫。"},
+        {text:"尊重他的意願，扶著他自己走去廁所，反正有人在旁邊攙扶應該沒問題", correct:false, explain:"單側無力的患者行走跌倒風險很高，即使有人攙扶也不應該讓他此時起身走動。"},
+        {text:"直接用身體力量把他按回椅子上，避免他繼續掙扎起身", correct:false, explain:"強硬壓制可能造成不必要的肢體衝突或受傷，應以溫和但堅定的言語勸阻為主。"},
+        {text:"先不理會他的躁動，繼續完成手邊正在做的評估，等他自己冷靜下來再說", correct:false, explain:"患者隨時可能自行起身跌倒，不應該忽略這個立即的安全風險。"}
+      ]},
     {type:"choice", scene:"你確認符合FAST三項異常，家屬說「大概40分鐘前開始的」。",
       question:"這個「時間」資訊為什麼重要？",
       choices:[

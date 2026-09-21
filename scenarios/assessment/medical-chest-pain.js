@@ -31,7 +31,7 @@ SCENARIOS.push({
         positionSpec:{position:"semiFowler"},
         explain:"疑似心臟疾病病人適合半坐臥等舒適姿勢，並依評估給予氧氣、儘速送醫，避免平躺抬腳增加心臟負荷。"},
       mistakes:[{tool:"oxygenMask",target:"head",explain:"給氧固然重要，但此時優先要讓病人採取合適體位，兩者會一起進行。"}]},
-    {type:"emergency", timeLimit:8, scene:"病人突然癱軟、沒有反應，且沒有正常呼吸。現場只剩你和一名家屬。",
+    {type:"emergency", timeLimit:8, randomChance:0.4, scene:"病人突然癱軟、沒有反應，且沒有正常呼吸。現場只剩你和一名家屬。",
       question:"此刻最優先的反應？",
       choices:[
         {text:"立即請家屬撥打119並取得AED，同時開始CPR胸部按壓", correct:true, explain:"無反應且沒有正常呼吸應立即啟動求救、取得AED並開始CPR，不能先花時間完成一般病史或量測。"},

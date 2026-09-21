@@ -17,8 +17,11 @@ SCENARIOS.push({
         {text:"先讓患者喝大量的水，把藥物沖淡",correct:false,explain:"意識不清患者有吸入風險，口服液體不能處理呼吸抑制。"},
         {text:"等患者自行醒來後，再詢問他吃了什麼藥",correct:false,explain:"等待會延誤呼吸支持，病史可由家屬或現場線索同步取得。"}
       ]},
-    {type:"action", scene:"你已開始呼吸支持，患者短暫改善但仍昏沉。",
+    {type:"action", scene:"呼吸道打開後，患者呼吸仍只有約5次/分，嘴唇仍發紫，明顯不足以維持有效換氣。",
+      prompt:"你會做什麼？",
+      correct:{tool:"bvm",target:"head",explain:"呼吸速率過慢、已出現發紺，光是打開呼吸道不夠，必須用BVM主動給予人工呼吸支持。"},mistakes:[]},
+    {type:"action", scene:"開始人工呼吸支持後，患者膚色略有改善但仍昏沉。",
       prompt:"接下來？",
-      correct:{tool:"ongoingMonitor",target:"patient",explain:"拮抗劑效果可能短於藥物作用時間，需持續監測並準備再次惡化。"},mistakes:[]}
+      correct:{tool:"ongoingMonitor",target:"patient",explain:"鴉片類藥物拮抗劑的效果可能短於藥物本身的作用時間，即使症狀一度改善，仍需持續監測並準備再次惡化，呼吸支持不能中斷。"},mistakes:[]}
   ]
 });

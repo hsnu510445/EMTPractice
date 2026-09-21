@@ -12,6 +12,7 @@ SCENARIOS.push({
       {text:"讓患者走動以確認呼吸是否真的變差",correct:false,explain:"呼吸窘迫患者不應被要求增加活動。"},
       {text:"因為傷口小，先完成完整病史再處理呼吸",correct:false,explain:"外部傷口大小不能代表胸腔內傷害程度。"}
     ]},
-    {type:"action",scene:"氧氣已提供，患者仍有呼吸窘迫，正在等待快速後送。",prompt:"接下來？",correct:{tool:"ongoingMonitor",target:"patient",explain:"持續監測呼吸、意識、皮膚與脈搏，注意呼吸突然惡化並立即回報。"},mistakes:[]}
+    {type:"action",scene:"氧氣已提供，傷口周圍仍看得到氣泡與血液滲出。",prompt:"你會怎麼處理傷口？",correct:{tool:"coverBurn",target:"chest",explain:"用乾淨敷料覆蓋保護傷口，避免外界持續污染或空氣經傷口大量進出；敷料固定方式須依受訓範圍與單位流程（例如是否使用三邊固定的透氣型敷料），不確定時以能觀察患者呼吸變化為原則。"},mistakes:[]},
+    {type:"action",scene:"傷口已覆蓋，患者仍有呼吸窘迫，正在等待快速後送。",prompt:"接下來？",correct:{tool:"ongoingMonitor",target:"patient",explain:"持續監測呼吸、意識、皮膚與脈搏；胸部穿刺傷最需要警覺的惡化徵象是張力性氣胸——呼吸窘迫突然加劇、頸靜脈怒張、氣管偏移、患側呼吸音更弱，一旦出現要立即回報並加速後送。"},mistakes:[]}
   ]
 });

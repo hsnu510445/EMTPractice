@@ -7,6 +7,15 @@ SCENARIOS.push({
       prompt:"接觸傷患前你最需要確認什麼？",
       correct:{tool:"sceneCheck",target:"scene",explain:"電源若未確認已切斷，貿然觸碰傷患或潮濕地面可能讓你自己也遭到電擊；應先確認電源已關閉，或由具備絕緣裝備、受過訓練的人員先隔離電源，才能安全接觸。"},
       mistakes:[{tool:"verbalCheck",target:"patient",explain:"電源尚未確認關閉前直接接觸傷患，有觸電風險，需先確保現場安全。"}]},
+    {type:"emergency", timeLimit:8, randomChance:0.4,
+      scene:"同事正在確認電源總開關時，另一名不知情的員工急著想幫忙，伸手就要去把地上那條電線移開。",
+      question:"你會怎麼做？",
+      choices:[
+        {text:"立即出聲制止他，說明電源尚未確認完全安全前，任何人都不應該觸碰電線或站在潮濕區域", correct:true, explain:"電源是否真的已經切斷還在確認中，貿然觸碰電線可能讓這名員工也變成新的傷患。"},
+        {text:"讓他移開沒關係，反正主開關應該快關了，先把電線挪開比較不會絆到人", correct:false, explain:"在電源確實關閉並確認安全之前，不應該讓任何人觸碰電線，即使開關「應該快關了」也不能假設安全。"},
+        {text:"不特別出聲阻止，只是心裡覺得這樣做不太好，繼續專心處理原本的傷患", correct:false, explain:"發現有立即的觸電風險時應該主動出聲制止，不能只是心裡覺得不妥卻不採取行動。"},
+        {text:"請他順便把電線拿去丟掉，同時清空現場動線方便搬運傷患", correct:false, explain:"在確認電源安全前，不應該指示任何人去移動或處理電線。"}
+      ]},
     {type:"action", scene:"同事已確認並關閉了電源總開關，現場安全。",
       prompt:"你接觸傷患後第一步？",
       correct:{tool:"verbalCheck",target:"patient",explain:"確認現場安全後，依初步評估順序先確認意識程度（AVPU）。"},

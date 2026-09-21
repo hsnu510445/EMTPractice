@@ -2,7 +2,6 @@ SCENARIOS.push({
   id:"advanced-airway", category:"advanced", difficulty:3,
   title:"面罩通氣一直漏氣的患者",
   summary:"高級救護練習：從呼吸道評估、有效通氣到辨識進階氣道處置的資格限制。",
-  realCase:{title:"高級救護教材主題：呼吸道與通氣",summary:"本題將呼吸道評估、面罩密合、通氣品質與持續監測串成一個需要反覆修正的救護流程。",learningPoint:"先處理可立即改善的呼吸道與通氣問題，再依資格、醫療指導與現場規範考慮進階氣道。",source:"reference/高級救護技術員教科書.pdf"},
   steps:[
     {type:"action",scene:"你在臥室發現一名患者仰躺，呼吸很慢，旁邊有嘔吐物；室內沒有明顯危險。",prompt:"接近患者後先做什麼？",correct:{tool:"sceneCheck",target:"scene",explain:"仍要先確認現場安全與暴露風險，再進入初步評估。"},mistakes:[]},
     {type:"action",scene:"患者無法完整回答問題，胸部起伏微弱，口腔內可見分泌物。",prompt:"你要先確認哪個生命威脅？",correct:{tool:"lookListenFeel",target:"chest",explain:"先確認呼吸品質；微弱、緩慢的呼吸代表通氣不足，不能只看有沒有胸部起伏。"},mistakes:[]},

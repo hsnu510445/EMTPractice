@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-dka", category:"special", difficulty:2,
+  title:"一直喝水又喘個不停的糖尿病患者",
+  summary:"第一型糖尿病患者感冒後意識模糊、呼吸又深又快，練習辨識高血糖急症與低血糖的差異。",
+  steps:[
+    {type:"action", scene:"你到達時，一名19歲第一型糖尿病患者靠坐在床邊，家屬說他這幾天感冒沒有食慾，一直喊口渴，呼吸看起來很深很費力。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:odor","patient:distress"],
+        giFindings:{
+          "patient:odor":"靠近時聞到一股淡淡的水果甜味",
+          "patient:distress":"呼吸又深又快，嘴唇乾裂，看起來有點嗜睡"
+        },
+        explain:"觀察他的呼吸型態與氣味，這些都是判斷血糖相關急症種類的重要線索。"},
+      mistakes:[]},
+    {type:"action", scene:"你評估他的呼吸。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"lookListenFeel",target:"chest",respRate:32,
+        reading:"32次/分，呼吸深且規則",
+        explain:"這種又深又快、規律的呼吸型態，是身體試圖透過呼吸代償體內酸中毒的表現。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸評估後。",
+      prompt:"你會用什麼工具評估他的血糖？",
+      correct:{tool:"glucometer",target:"leftArm",altTargets:["rightArm"],
+        reading:"血糖機顯示「HIGH」，已經超過機器可測量的上限",
+        explain:"血糖值極度偏高，合併深快呼吸與水果味，需要考慮嚴重的高血糖相關急症。"},
+      mistakes:[]},
+    {type:"choice", scene:"血糖極度過高、呼吸深快又規律，合併淡淡的水果甜味。",
+      question:"這個組合最符合下列哪一種狀況？",
+      choices:[
+        {text:"疑似糖尿病酮酸中毒，身體處於嚴重高血糖與酸中毒狀態，深快呼吸是身體代償酸中毒的表現，需要優先維持呼吸循環並儘速送醫", correct:true, explain:"極高血糖、深快規律呼吸與水果味三者合併出現，是糖尿病酮酸中毒的典型表現組合。"},
+        {text:"這是低血糖的典型表現，應該立即給予口服糖分處理", correct:false, explain:"血糖機顯示的是極度偏高，不是偏低，跟低血糖的處置方向相反。"},
+        {text:"水果味只是他剛好吃過水果留下的味道，跟血糖狀況沒有關聯", correct:false, explain:"這股氣味來自身體代謝產生的酮體，跟目前的血糖狀況有直接關聯。"},
+        {text:"只要病人還有呼吸、還能對答，血糖再高也不用列為優先處理的問題", correct:false, explain:"極度高血糖合併酸中毒的代償性呼吸，是需要優先處理與儘速送醫的狀況。"}
+      ]},
+    {type:"action", scene:"你想進一步了解狀況。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"history",target:"patient",
+        reading:"家屬表示他這幾天感冒食慾不好，覺得反正沒怎麼吃東西，胰島素就跟著減量甚至沒有施打",
+        explain:"感染或生病期間胰島素需求其實會增加而非減少，擅自減少或停用胰島素是誘發酮酸中毒的常見原因。"},
+      mistakes:[]},
+    {type:"action", scene:"確認狀況後。",
+      prompt:"接下來你會做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測意識程度、呼吸型態與生命徵象，酮酸中毒可能隨時間惡化，需要密切觀察並儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明血糖數值、呼吸型態與氣味、胰島素使用情形及近期生病史，這些資訊對醫院判斷與處置酮酸中毒非常重要。"},
+      mistakes:[]}
+  ]
+});

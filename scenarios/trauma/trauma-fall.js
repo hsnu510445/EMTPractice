@@ -7,6 +7,15 @@ SCENARIOS.push({
       prompt:"抵達現場你第一件事？",
       correct:{tool:"sceneCheck",target:"scene",explain:"工地環境常有持續性危險，現場安全評估優先。"},
       mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.4,
+      scene:"你正要靠近傷患時，上方傳來「匡噹」一聲，一塊鷹架上的木板掉落，砸在離你們不遠的地方。",
+      question:"你會怎麼做？",
+      choices:[
+        {text:"立即帶著傷患與自己退到安全距離外，並請現場人員確認上方沒有其他鬆脫的物品，確認安全後才繼續評估", correct:true, explain:"墜落物代表現場還有持續性危險，應優先重新確保安全，避免自己與傷患再次受到二次傷害。"},
+        {text:"這只是意外掉落一次，機率不高，繼續留在原地完成評估比較有效率", correct:false, explain:"掉落物代表上方可能還有其他鬆脫的結構或物品，不應該假設不會再發生。"},
+        {text:"請傷患自己先起身走到旁邊躲避，你留在原地觀察還有沒有東西掉下來", correct:false, explain:"懷疑脊椎受傷的傷患不應該自行起身走動，這樣可能加重傷害。"},
+        {text:"不理會掉落聲，專心先完成手邊正在做的傷病機轉評估再說", correct:false, explain:"現場安全永遠優先於評估的連續性，不應該忽略新出現的危險。"}
+      ]},
     {type:"choice", scene:"現場安全，你靠近傷患。從3公尺高處墜落且抱怨背痛。",
       question:"這是重要的什麼資訊？",
       choices:[

@@ -20,7 +20,7 @@ SCENARIOS.push({
     {type:"action", scene:"家屬說患者今天早上7點吃早餐時還完全正常，約7點25分開始講話不清楚。",
       prompt:"這個資訊你會如何處理？",
       correct:{tool:"history",target:"patient",reading:"家屬表示最後一次完全正常時間約07:00，症狀約07:25出現",explain:"中風評估中特別重要的是最後一次被確認正常的時間，應清楚記錄並交班。"},mistakes:[]},
-    {type:"action", scene:"患者仍清醒，但開始噁心。你準備持續評估。",
+    {type:"action", scene:"患者仍清醒，但開始噁心，額頭冒了點汗。",
       prompt:"你會做什麼？",
       correct:{tool:"ongoingMonitor",target:"patient",explain:"神經症狀可能變化，應持續監測意識、呼吸與生命徵象並儘速送醫。"},mistakes:[]},
     {type:"action", scene:"準備送醫交班。",

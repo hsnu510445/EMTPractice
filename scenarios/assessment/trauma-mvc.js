@@ -7,7 +7,7 @@ SCENARIOS.push({
       prompt:"你的第一步應該是？",
       correct:{tool:"sceneCheck",target:"scene",explain:"現場安全評估永遠是第一步，確保救護人員與傷患不會因二次事故受傷，同時判斷是否需要更多資源。"},
       mistakes:[{tool:"verbalCheck",target:"patient",explain:"未確認現場安全前貿然接觸傷患，可能使自己也成為傷患。"}]},
-    {type:"emergency", timeLimit:8, scene:"你正準備接近機車傷患時，後方突然又發生碰撞：一輛轎車撞上路旁護欄，現場聞到汽油味，駕駛卡在車內，原本的機車傷患仍倒在車流旁。",
+    {type:"emergency", timeLimit:8, randomChance:0.4, scene:"你正準備接近機車傷患時，後方突然又發生碰撞：一輛轎車撞上路旁護欄，現場聞到汽油味，駕駛卡在車內，原本的機車傷患仍倒在車流旁。",
       question:"這個突發狀況下，現在最優先做什麼？",
       choices:[
         {text:"先撤到安全位置、警戒車流並通報消防/警察與增援，再重新分流兩處傷患", correct:true, explain:"現場出現二次碰撞與汽油味，救護人員可能暴露在車流與火災危險中；先確保場安、建立警戒並請求適當資源，才能安全處理兩處傷患。"},
@@ -15,7 +15,7 @@ SCENARIOS.push({
         {text:"先進入轎車把駕駛拉出來，因為受困傷患看起來最危急", correct:false, explain:"受困與汽油味可能需要消防救援與專業脫困；未確認車輛穩定、火災風險與救援條件前，不應自行進入。"},
         {text:"先替原本傷患固定右腿，避免骨折移位，再請路人幫忙看住汽油外洩", correct:false, explain:"肢體固定不能優先於新增的現場危害；路人也不應被派去接近可能起火的汽油外洩區域。"}
       ]},
-    {type:"action", scene:"現場已管制安全，你準備接觸傷患。",
+    {type:"action", scene:"確認現場安全後，你準備接觸傷患。",
       prompt:"接觸前你應該？",
       correct:{tool:"gloves",target:"self",explain:"標準防護措施（BSI）是接觸傷患前的必要步驟，避免體液交叉感染。"},
       mistakes:[{tool:"generalImpression",target:"patient",explain:"應先做好防護才接觸傷患。"}]},

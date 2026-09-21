@@ -2,7 +2,6 @@ SCENARIOS.push({
   id:"advanced-inhalation-burn", category:"advanced", difficulty:3,
   title:"火場外表不嚴重、聲音卻沙啞的患者",
   summary:"高級救護練習：辨識吸入性傷害警訊、給氧與快速後送優先順序。",
-  realCase:{title:"高級救護教材主題：燒傷與吸入性傷害",summary:"本題聚焦火場後聲音改變、呼吸窘迫與臉部燒傷等早期警訊。",learningPoint:"吸入性傷害可能快速惡化，外表燒傷面積不大不代表風險低；要優先維持呼吸道、給予適當支持並快速送醫。",source:"reference/高級救護技術員教科書.pdf"},
   steps:[
     {type:"action",scene:"公寓廚房起火後已由消防人員控制，患者在門外咳嗽，衣物只有小範圍燒焦。",prompt:"接近前的第一步？",correct:{tool:"sceneCheck",target:"scene",explain:"確認火勢、煙霧、電氣與建築物安全，並依現場指揮進入安全區域。"},mistakes:[]},
     {type:"action",scene:"患者清醒但聲音沙啞，鼻毛燒焦，臉部有煙灰，說喉嚨越來越緊。",prompt:"你要優先評估什麼？",correct:{tool:"lookListenFeel",target:"chest",explain:"要立即評估呼吸品質與呼吸窘迫，同時把聲音沙啞、臉部燒傷與煙霧暴露視為吸入性傷害警訊。"},mistakes:[]},

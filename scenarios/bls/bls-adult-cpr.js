@@ -11,6 +11,15 @@ SCENARIOS.push({
       prompt:"下一步？",
       correct:{tool:"callHelp",target:"scene",explain:"確認無反應後應立即啟動緊急醫療系統並取得AED，同時準備評估呼吸脈搏。"},
       mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.4,
+      scene:"你正準備檢查患者的呼吸與脈搏，一位情緒崩潰的家屬突然衝過來，想把他搖醒。",
+      question:"你會怎麼處理？",
+      choices:[
+        {text:"一邊繼續你的評估流程，一邊請旁人協助安撫並暫時帶開這位家屬，避免搖晃影響你的判斷", correct:true, explain:"評估與急救流程不能被中斷，同時請其他人協助安撫家屬，是兼顧現場情緒與病人安全的做法。"},
+        {text:"先放下手邊的評估，花時間好好安慰這位家屬，等他情緒穩定一點再繼續", correct:false, explain:"這時候評估與急救的時效性優先，不應該暫停評估流程去安撫家屬。"},
+        {text:"大聲要求家屬立刻閉嘴、退到一邊去，不然無法專心評估", correct:false, explain:"強硬的態度可能讓現場情緒更失控，也不利於後續配合。"},
+        {text:"讓家屬繼續搖晃患者，順便觀察搖晃後患者有沒有反應", correct:false, explain:"搖晃可能加重潛在的頸椎或其他傷害，不應該讓未受訓練的人這樣做。"}
+      ]},
     {type:"choice", scene:"有人已去打119拿AED，你檢查發現沒有正常呼吸（僅有喘息）且無脈搏。",
       question:"成人胸部按壓的正確深度與速率大約是？",
       choices:[

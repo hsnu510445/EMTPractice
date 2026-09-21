@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-meningitis-child", category:"special", difficulty:3,
+  title:"發燒合併紫斑的小孩",
+  summary:"發燒幼兒合併皮膚出現不會退色的紫紅色斑點與嗜睡，練習辨識兒童嚴重感染的警訊。",
+  steps:[
+    {type:"action", scene:"你到達時，一名4歲女童躺在媽媽懷裡，媽媽說她從昨晚開始發燒，今天早上變得很嗜睡、叫不太醒。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:skinColor","patient:distress"],
+        giFindings:{
+          "patient:skinColor":"手腳與軀幹上散布著幾處紫紅色的小斑點",
+          "patient:distress":"看起來嗜睡、對媽媽的呼喚反應比平常慢"
+        },
+        explain:"觀察她的皮膚與意識反應，紫紅色斑點合併嗜睡是需要提高警覺的組合。"},
+      mistakes:[]},
+    {type:"action", scene:"你想確認她的體溫。",
+      prompt:"你會做什麼？",
+      correct:{tool:"thermometer",target:"patient",
+        reading:"耳溫39.6°C",
+        explain:"確認發燒程度，合併其他警訊一起評估整體嚴重度。"},
+      mistakes:[]},
+    {type:"choice", scene:"媽媽說她剛剛試著輕輕壓了皮膚上的斑點，顏色沒有跟著變淡或消失。",
+      question:"這個現象代表什麼意義？",
+      choices:[
+        {text:"不會因壓迫而退色的皮疹，合併發燒與嗜睡，是嚴重細菌感染（如腦膜炎球菌敗血症）的重要警訊，需要當作緊急狀況儘速送醫", correct:true, explain:"壓不退色的紫紅色皮疹合併發燒、嗜睡，是兒童嚴重感染的經典警訊組合，不能輕忽。"},
+        {text:"這只是一般的熱疹或蚊蟲咬傷，退燒之後通常就會自己消失", correct:false, explain:"一般熱疹或蚊蟲咬傷壓了通常會退色，這種壓不退色的表現需要更高警覺。"},
+        {text:"只要小孩還有意識、能被叫醒，皮疹的顏色變化就不需要太緊張", correct:false, explain:"目前她的意識反應已經比平常慢，這本身就是需要優先處理的警訊之一。"},
+        {text:"壓了會不會退色只是民間說法，沒有實際的臨床意義", correct:false, explain:"這其實是臨床上判斷皮疹性質的重要且有根據的評估方式。"}
+      ]},
+    {type:"action", scene:"你決定進一步評估循環狀況。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"pulseCheck",target:"leftArm",altTargets:["rightArm"],
+        reading:"脈搏摸得到但偏快，約140次/分",
+        explain:"心跳偏快合併發燒、嗜睡與皮疹，需要考慮全身性嚴重感染合併循環代償的可能。"},
+      mistakes:[]},
+    {type:"action", scene:"評估後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"simpleMask", flowMin:6, flowMax:10},
+        explain:"嚴重感染可能影響全身氧氣供應，給予氧氣支持並儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫途中。",
+      prompt:"你會做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測意識程度、皮疹範圍變化與生命徵象，這類感染可能快速惡化。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要清楚說明發燒時間、意識變化、壓不退色的皮疹發現與生命徵象，這些資訊對醫院判斷與快速處置非常關鍵。"},
+      mistakes:[]}
+  ]
+});

@@ -29,344 +29,39 @@
         <h2>練習</h2>
         <p>用情境劇本操作器材、複習評估流程，看看自己還記得多少。</p>
       </div>
-      <a class="home-card" href="triage.html">
+      <a class="home-card" id="goTriageBtn" href="triage.html">
         <div class="home-card-icon">🚑</div>
         <h2>檢傷分類</h2>
         <p>大量傷患事件，同時面對好幾個人，練習用START分類判斷誰要優先送醫。</p>
       </a>
-      <a class="home-card" href="command.html">
+      <a class="home-card" id="goCommandBtn" href="command.html">
         <div class="home-card-icon">🗣️</div>
         <h2>分配隊友</h2>
         <p>先快速分工，再接聽突發無線電，在倒數壓力下重新調度隊友。</p>
       </a>
-      <a class="home-card" href="reference.html">
+      <a class="home-card" id="goReferenceBtn" href="reference.html">
         <div class="home-card-icon">📖</div>
         <h2>重點整理</h2>
         <p>口訣、流程順序、各種數值參考，練習前後都可以翻。</p>
       </a>
+      <div class="home-card" id="goNotesBtn">
+        <div class="home-card-icon">❓</div>
+        <h2>我的疑問筆記</h2>
+        <p>練習中存下的疑問，累積一陣子後可以匯出整份問AI或找人討論。</p>
+      </div>
     </div>
   </section>
 
   <section id="referenceScreen" class="hidden"></section>
 
-  <section id="triageListScreen" class="hidden">
-    <button class="btn btn-outline" id="homeFromTriageListBtn" style="margin-bottom:14px;">← 返回首頁</button>
-    <div class="grid" id="triageGrid"></div>
-  </section>
-
-  <section id="triagePlayScreen" class="hidden">
-    <div class="game-header">
-      <button class="btn btn-outline" id="backFromTriagePlayBtn">← 返回檢傷列表</button>
-    </div>
-    <div class="scene-box">
-      <div class="scene-text" id="triageIntro"></div>
-      <div class="triage-timer-row">
-        <span id="triageProgress"></span>
-        <span>目前：<b id="triageCurrentPatient">-</b></span>
-        <span>⏱ 這位傷患：<b id="triagePatientTimer">00:00</b></span>
-        <span>總計時間：<b id="triageTotalTimer">00:00</b></span>
-      </div>
-      <div id="triagePatientGrid" class="triage-patient-grid"></div>
-      <div class="next-row"><button class="btn btn-primary" id="triageSubmitBtn">下一位</button></div>
-    </div>
-  </section>
-
-  <section id="triageResultScreen" class="hidden">
-    <div class="result-box">
-      <div style="font-size:0.9rem;color:var(--muted);">檢傷分類結果</div>
-      <div class="big-score" id="triageScore"></div>
-      <div id="triageResultList" style="margin-top:10px;"></div>
-      <div id="triageRealCaseBox" class="real-case-box hidden"></div>
-      <div class="result-actions">
-        <button class="btn btn-primary" id="triageReplayBtn">再挑戰一次</button>
-        <button class="btn btn-outline" id="triageToListBtn">返回檢傷列表</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="commandListScreen" class="hidden">
-    <button class="btn btn-outline" id="homeFromCommandListBtn" style="margin-bottom:14px;">← 返回首頁</button>
-    <div class="grid" id="commandGrid"></div>
-  </section>
-
-  <section id="commandPlayScreen" class="hidden">
-    <div class="game-header">
-      <button class="btn btn-outline" id="backFromCommandPlayBtn">← 返回列表</button>
-    </div>
-    <div class="scene-box">
-      <div class="scene-text" id="commandIntro"></div>
-      <div class="command-crew-box" id="commandCrewBox"></div>
-      <div class="command-task-list" id="commandTaskList"></div>
-      <div id="commandLivePanel" class="command-live-panel hidden">
-        <div class="command-live-topline">
-          <span id="commandRoundLabel"></span>
-          <span>病患穩定度 <b id="commandStability">100</b>%</span>
-          <span>團隊信任 <b id="commandTrust">100</b>%</span>
-        </div>
-        <div class="command-radio" id="commandRadio"></div>
-        <div class="command-choice-list" id="commandChoiceList"></div>
-        <div class="command-event-log" id="commandEventLog"></div>
-      </div>
-      <div class="next-row"><button class="btn btn-primary" id="commandSubmitBtn">送出分工</button></div>
-    </div>
-  </section>
-
-  <section id="commandResultScreen" class="hidden">
-    <div class="result-box">
-      <div style="font-size:0.9rem;color:var(--muted);">分工結果</div>
-      <div class="big-score" id="commandScore"></div>
-      <div id="commandResultList" style="margin-top:10px;"></div>
-      <div class="result-actions">
-        <button class="btn btn-primary" id="commandReplayBtn">再挑戰一次</button>
-        <button class="btn btn-outline" id="commandToListBtn">返回列表</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="menuScreen" class="hidden">
-    <button class="btn btn-outline" id="homeFromMenuBtn" style="margin-bottom:14px;">← 返回首頁</button>
-    <div class="mystery-bar">
-      <label class="mystery-toggle"><input type="checkbox" id="mysteryToggle" checked> 🔍 神秘模式（隱藏分類與標題，遊玩中自己找線索）</label>
-      <button class="btn btn-primary" id="randomBtn">🎲 隨機情境</button>
-    </div>
-    <div class="filters" id="filterBar"></div>
-    <div class="grid" id="scenarioGrid"></div>
-  </section>
-
-  <section id="gameScreen" class="hidden">
-    <div class="game-header">
-      <button class="btn btn-outline" id="backToMenuBtn">← 返回選單</button>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span id="stepCounter" style="font-size:0.8rem;color:var(--muted);"></span>
-    </div>
-    <div class="game-layout">
-    <aside class="notes-sidebar">
-      <div class="notes-title">📝 現場筆記</div>
-      <div class="notes-list" id="notesList"></div>
-    </aside>
-    <div class="game-main">
-    <div class="scene-box">
-      <div class="step-label" id="stepLabel"></div>
-      <span class="mode-tag" id="modeTag"></span>
-      <div class="scene-text" id="sceneText"></div>
-      <div class="question-text" id="questionText"></div>
-
-      <div id="choiceArea" class="hidden">
-        <div class="choices" id="choicesBox"></div>
-      </div>
-
-      <div id="actionArea" class="hidden">
-        <div class="action-layout">
-          <div class="diagram-card">
-            <svg class="patient" id="patientSvg" viewBox="0 0 200 340"></svg>
-            <div class="selected-tool-hint hidden" id="selectedToolHint"></div>
-            <div class="applied-log" id="appliedLog"></div>
-          </div>
-
-          <div class="tech-card">
-            <div class="tech-card-title">🧠 你的判斷與技巧（不需要開包，隨時可用）</div>
-            <div class="tray-tabs" id="techTabs"></div>
-            <div class="tray-tools" id="techTools"></div>
-          </div>
-          <div class="hint-btn-row"><button class="btn btn-outline hidden" id="hintBtn">💡 顯示提示</button></div>
-          <div class="tray-wrap" id="posWrap">
-            <div class="pos-panel" id="posPanelInner">
-              <h4>選擇要擺的姿勢</h4>
-              <div class="pos-options" id="posOptions"></div>
-            </div>
-          </div>
-
-          <div class="tray-wrap" id="monitorWrap">
-            <div class="monitor-panel">
-              <h4>持續評估：依序重新檢查</h4>
-              <div class="monitor-checklist" id="monitorChecklist"></div>
-              <button class="btn btn-primary" id="monitorConfirmBtn" disabled>完成這輪重新評估</button>
-            </div>
-          </div>
-
-          <div class="kit-row">
-            <div class="kit-item" id="bagItem"><span class="kit-icon" id="bagIcon"></span><span class="lbl">急救包</span></div>
-            <div class="kit-item" id="o2Item"><span class="kit-icon" id="o2Icon"></span><span class="lbl">氧氣鋼瓶</span></div>
-          </div>
-          <div class="tray-wrap" id="trayWrap">
-            <div class="tray-card">
-              <div class="tray-tabs" id="trayTabs"></div>
-              <div class="tray-tools" id="trayTools"></div>
-            </div>
-          </div>
-          <div class="tray-wrap" id="o2Wrap">
-            <div class="o2-panel">
-              <h4>選擇給氧裝置與流量</h4>
-              <div class="o2-devices" id="o2Devices"></div>
-              <div class="o2-flow-row">
-                <span style="font-size:0.8rem;">流量</span>
-                <input type="range" id="o2FlowSlider" min="0" max="20" step="1" value="0">
-                <span class="o2-flow-val" id="o2FlowVal">0 L/min</span>
-              </div>
-              <button class="btn btn-primary" id="o2ConfirmBtn" disabled>接上病患</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="feedbackArea"></div>
-      <div class="next-row" id="nextRow"></div>
-    </div>
-    </div>
-    </div>
-  </section>
-
-  <section id="resultScreen" class="hidden">
-    <div class="result-box">
-      <div style="font-size:0.9rem;color:var(--muted);">情境完成 · 揭曉</div>
-      <h2 id="resultTitle" style="margin:6px 0;"></h2>
-      <div class="reveal-category" id="resultCategory"></div>
-      <div class="big-score" id="resultScore"></div>
-      <div id="resultSub" style="color:var(--muted);font-size:0.85rem;"></div>
-      <div id="reviewList"></div>
-      <div id="realCaseBox" class="real-case-box hidden"></div>
-      <div class="result-actions">
-        <button class="btn btn-primary" id="replayBtn">再玩一次</button>
-        <button class="btn btn-outline" id="toMenuBtn">返回選單</button>
-      </div>
-    </div>
-  </section>
+  <script src="partials/triage.js"></script>
+  <script src="partials/command.js"></script>
+  <script src="partials/practice.js"></script>
 </main>
 
 <footer>做給自己複習用的小工具・資料可隨時擴充</footer>
 
-<div class="modal-overlay" id="cheatModal">
-  <div class="modal">
-    <h2>速查表 / 常用縮寫</h2>
-    <h3>整體流程順序</h3>
-    <ul>
-      <li>現場安全評估 → 標準防護 BSI → 建立整體印象（傷病機轉 MOI/NOI）</li>
-      <li>初步評估：意識 AVPU → 呼吸道 Airway → 呼吸 Breathing → 循環 Circulation（含大出血控制）</li>
-      <li>優先度決定（是否需要立即送醫）</li>
-      <li>病史與身體評估：創傷→快速創傷評估 DCAP-BTLS；醫療→SAMPLE + OPQRST</li>
-      <li>基礎生命徵象測量 → 詳細身體檢查（狀況允許時）</li>
-      <li>持續評估（Ongoing Assessment） → 送醫交班</li>
-    </ul>
-    <h3>AVPU（意識程度）</h3>
-    <ul><li>A 清醒　V 對聲音有反應　P 對疼痛有反應　U 無反應</li></ul>
-    <h3>SAMPLE（病史）</h3>
-    <ul><li>S症狀 A過敏史 M用藥史 P過去病史 L最後進食 E事發經過</li></ul>
-    <h3>OPQRST（疼痛/症狀評估）</h3>
-    <ul><li>O發作方式 P誘發/緩解 Q性質 R轉移 S嚴重度 T時間</li></ul>
-    <h3>DCAP-BTLS（創傷檢查重點）</h3>
-    <ul><li>D變形 C挫傷 A擦傷 P穿刺傷 B燒傷 T觸痛 L撕裂傷 S腫脹</li></ul>
-    <h3>CPR 按壓速率／深度／比例（參考值）</h3>
-    <table>
-      <tr><th>對象</th><th>速率</th><th>深度</th><th>單人比例</th></tr>
-      <tr><td>成人</td><td>100-120/分</td><td>至少5公分</td><td>30:2</td></tr>
-      <tr><td>兒童</td><td>100-120/分</td><td>約胸廓前後徑1/3</td><td>30:2</td></tr>
-      <tr><td>嬰兒</td><td>100-120/分</td><td>約4公分</td><td>30:2</td></tr>
-    </table>
-    <p style="font-size:0.78rem;color:var(--muted);">雙人施救兒童/嬰兒比例常為15:2，實際數值請以現行官方指引為準。量測工具（血壓計、血糖機、觸診脈搏等）測到的數字含意與正常區間請自行判斷或事後查證，本表故意不列出，以免影響練習效果。</p>
-    <div class="close-row"><button class="btn btn-primary" id="closeCheatBtn">關閉</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="cprModal">
-  <div class="modal cpr-modal">
-    <div class="cpr-topbar">
-      <div class="cpr-role-badge" id="cprRoleBadge"></div>
-      <div class="cpr-ticker" id="cprTicker"></div>
-    </div>
-    <div class="cpr-fatigue-row hidden" id="cprFatigueRow">
-      <span style="font-size:0.78rem;">體力</span>
-      <div class="cpr-fatigue-track"><div class="cpr-fatigue-fill" id="cprFatigueFill"></div></div>
-      <button class="btn btn-outline hidden" id="cprHandoffBtn">🙋 請求換手</button>
-    </div>
-    <div class="cpr-body" id="cprBody"></div>
-    <div class="cpr-log" id="cprLog"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="giModal">
-  <div class="modal gi-modal">
-    <h4 style="margin:0 0 4px;font-size:0.95rem;">建立整體印象：點身體部位，選擇要查看的項目</h4>
-    <p style="font-size:0.76rem;color:var(--muted);margin:0 0 10px;">每個部位都有幾個可以查看的項目，但不是每一個都跟目前狀況有關——看完你覺得夠了，按下面的「完成」。</p>
-    <div id="giDiagramView">
-      <svg class="patient gi-svg" id="giSvg" viewBox="0 0 200 340"></svg>
-      <button class="btn btn-outline gi-overall-btn" id="giOverallBtn">🧍 整體觀察（不限單一部位）</button>
-    </div>
-    <div id="giItemsView" class="hidden">
-      <button class="btn btn-outline" id="giBackBtn" style="margin-bottom:10px;">← 換個部位</button>
-      <div id="giItemsList" class="gi-items-list"></div>
-    </div>
-    <div class="gi-log" id="giLog"></div>
-    <div class="close-row">
-      <button class="btn btn-outline" id="giCancelBtn">取消</button>
-      <button class="btn btn-primary" id="giConfirmBtn">✔ 完成整體印象</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="gcsModal">
-  <div class="modal">
-    <div class="gcs-panel" style="margin-top:0;background:none;border:none;padding:0;">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-        <h4 style="font-size:0.95rem;margin:0;">依照情境描述，評出GCS三項分數</h4>
-        <button class="btn btn-outline" id="gcsHintToggleBtn" style="font-size:0.75rem;padding:4px 10px;">💡 顯示分數說明</button>
-      </div>
-      <div class="gcs-group"><div class="gcs-group-title">👁️ 睜眼反應 E</div><div class="gcs-options" id="gcsEyeOptions"></div></div>
-      <div class="gcs-group"><div class="gcs-group-title">🗣️ 語言反應 V</div><div class="gcs-options" id="gcsVerbalOptions"></div></div>
-      <div class="gcs-group"><div class="gcs-group-title">✋ 運動反應 M</div><div class="gcs-options" id="gcsMotorOptions"></div></div>
-      <div class="cpr-hit-feedback" id="gcsFeedback"></div>
-      <div class="close-row">
-        <button class="btn btn-outline" id="gcsCancelBtn">取消</button>
-        <button class="btn btn-primary" id="gcsConfirmBtn" disabled>確認評分</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="tqModal">
-  <div class="modal cpr-modal">
-    <div class="cpr-instruction" id="tqInstruction"></div>
-    <div class="cpr-body" id="tqBody"></div>
-    <div class="cpr-log" id="tqLog"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="breathModal">
-  <div class="modal cpr-modal">
-    <div class="cpr-instruction">觀察側面胸廓起伏，用碼表計時，數出呼吸次數（次/分）</div>
-    <div class="breath-figure-wrap">
-      <svg class="breath-figure" viewBox="0 0 240 110">
-        <ellipse cx="200" cy="90" rx="34" ry="8" fill="#dfe6ec"/>
-        <circle cx="28" cy="55" r="16" fill="#e8b894"/>
-        <rect x="40" y="70" width="165" height="22" rx="11" fill="#cfd8e3"/>
-        <ellipse id="breathChest" class="breath-chest" cx="78" cy="70" rx="30" ry="13" fill="#a9c7e0"/>
-      </svg>
-    </div>
-    <div class="breath-stopwatch-row">
-      <div class="breath-timer" id="breathTimer">00 : 00.0</div>
-      <button class="btn btn-outline" id="breathStartBtn">▶ 開始／暫停</button>
-      <button class="btn btn-outline" id="breathResetBtn">↺ 歸零</button>
-    </div>
-    <div class="breath-input-row">
-      <label for="breathInput" style="font-size:0.85rem;">你數到的呼吸速率：</label>
-      <input type="number" id="breathInput" min="0" max="80" placeholder="次/分">
-      <button class="btn btn-primary" id="breathConfirmBtn">確認</button>
-    </div>
-    <div id="breathFeedback" class="cpr-hit-feedback"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="transportModal">
-  <div class="modal cpr-modal">
-    <div class="cpr-topbar">
-      <div class="cpr-role-badge" id="transportRoleBadge"></div>
-    </div>
-    <div class="cpr-body" id="transportBody"></div>
-    <div class="cpr-log" id="transportLog"></div>
-  </div>
-</div>
-
-
-
+<script src="partials/modals.js"></script>
 
 
 
@@ -430,6 +125,14 @@
 <script src="scenarios/advanced/advanced-inhalation-burn.js"></script>
 <script src="scenarios/advanced/advanced-acs.js"></script>
 <script src="scenarios/advanced/advanced-trauma-shock.js"></script>
+<script src="scenarios/special/special-ectopic-pregnancy.js"></script>
+<script src="scenarios/special/special-aortic-dissection.js"></script>
+<script src="scenarios/special/special-pulmonary-embolism.js"></script>
+<script src="scenarios/special/special-dka.js"></script>
+<script src="scenarios/special/special-meningitis-child.js"></script>
+<script src="scenarios/special/special-lightning-strike.js"></script>
+<script src="scenarios/special/special-excited-delirium.js"></script>
+<script src="scenarios/special/special-newborn-resuscitation.js"></script>
 
 <script src="app.js"></script>
 

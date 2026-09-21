@@ -37,6 +37,15 @@ SCENARIOS.push({
       prompt:"你會協助她？",
       correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"sittingUpright"},explain:"協助母親採取適合分娩的姿勢，並在胎頭娩出時給予適當支撐，避免用力拉扯。"},
       mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.4,
+      scene:"胎頭娩出的瞬間，你發現臍帶似乎繞在寶寶的脖子上一圈。",
+      question:"你會怎麼處理？",
+      choices:[
+        {text:"先冷靜檢查臍帶繞頸的鬆緊程度，若鬆可嘗試輕輕從頭部滑套鬆開，不要驚慌拉扯，讓生產繼續進行", correct:true, explain:"臍帶繞頸並不少見，多數情況下能輕輕鬆開處理，驚慌拉扯或剪斷反而可能造成更大的風險。"},
+        {text:"立即用力把臍帶剪斷，先讓寶寶跟臍帶分開，之後再處理其他問題", correct:false, explain:"在現場沒有適當器材與準備下貿然剪斷臍帶並不恰當，應先嘗試安全地鬆開繞頸的臍帶。"},
+        {text:"請產婦暫停用力，試著把胎頭推回產道裡，等呼叫更多支援後再繼續", correct:false, explain:"生產過程中不應該試圖把已經娩出的胎頭推回去，這樣做非常危險。"},
+        {text:"不理會臍帶的狀況，直接用力把寶寶拉出來，動作越快越好", correct:false, explain:"沒有先處理臍帶繞頸就用力拉扯，可能讓臍帶更纏緊，增加寶寶的風險。"}
+      ]},
     {type:"action", scene:"寶寶已經出生，發出哭聲。",
       prompt:"你現在最優先要做什麼？",
       correct:{tool:"blanket",target:"patient",explain:"新生兒體表面積大、容易快速失溫，出生後應立即擦乾並保暖包裹，除非有需要優先處理的呼吸道或哭聲/活動力異常。"},
