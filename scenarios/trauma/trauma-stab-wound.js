@@ -1,0 +1,60 @@
+SCENARIOS.push({
+  id:"trauma-stab-wound", category:"trauma", difficulty:3,
+  title:"夜市口角後的胸腹刺傷",
+  summary:"口角衝突後一人遭刺傷，現場可能還不安全，練習刺傷處置與現場安全的優先判斷，貿然行動可能讓你自己也成為下一個傷患。",
+  steps:[
+    {type:"choice", scene:"夜市外發生口角衝突，你抵達時看到一名男子倒地，胸口插著一把水果刀，圍觀民眾情緒激動，你不確定行兇者是否還在附近。",
+      question:"你到場後的第一個判斷是什麼？",
+      choices:[
+        {text:"在確認現場安全、必要時等待警方戒護前，不貿然上前接觸傷患，先於安全距離觀察現場狀況", correct:true, explain:"暴力事件現場的行兇者可能還在附近，貿然靠近可能讓救護人員自己也成為下一個受害者，現場安全永遠是第一步。"},
+        {text:"立即衝上前開始處理傷患，人命關天不應該在這種時候猶豫等待", correct:false, explain:"沒有確認安全前貿然接近暴力事件現場，風險非常高，可能讓自己也變成傷患，反而幫不了任何人。"},
+        {text:"先詢問圍觀群眾誰是行兇者，協助確認身份後再決定要不要靠近處理傷患", correct:false, explain:"確認身份不是救護人員在現場的優先任務，且在人群激動的情況下逗留詢問也有風險，應優先確保自身安全。"},
+        {text:"請傷患自己想辦法移動到比較安全的地方，你再過去接觸他", correct:false, explain:"胸口插著刀的傷患不應該被要求自行移動，這樣做可能讓刀刃移位造成更嚴重的內出血。"}
+      ]},
+    {type:"action", scene:"警方抵達控制現場、確認安全後，你上前評估傷患。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["chest:chestWound","patient:distress"],
+        giFindings:{
+          "chest:chestWound":"左胸口插著一把水果刀，刀柄外露，周圍有血跡滲出",
+          "patient:distress":"呼吸急促、表情痛苦，說話只能講短句"
+        },
+        explain:"建立整體印象，觀察異物位置與病人整體反應，胸部刺傷需要特別留意呼吸道與呼吸功能。"},
+      mistakes:[]},
+    {type:"choice", scene:"圍觀者中有人自告奮勇說「我幫你把刀拔出來，這樣比較好包紮」，說著就要伸手去拔。",
+      question:"你會怎麼阻止或處理？",
+      choices:[
+        {text:"立即制止，明確告知絕對不能拔除刺入的異物，刀刃可能正壓迫住血管，貿然拔除可能造成更嚴重的大出血或器官損傷", correct:true, explain:"刺入的異物在被移除前可能同時扮演著局部止血的作用，貿然拔除可能讓原本被壓制住的出血瞬間惡化，是刺傷處置中最重要的原則之一。"},
+        {text:"讓他拔出來，這樣才能對傷口進行正常的止血與包紮處置", correct:false, explain:"絕對不可以拔除刺入胸腹部的異物，這是刺傷處置的基本原則，貿然拔除風險極高。"},
+        {text:"讓刀留在原地，但沒有採取任何固定或穩定的動作，直接繼續評估其他部位", correct:false, explain:"異物留在原位還不夠，應該進一步固定穩定，避免搬運過程中刀刃移動造成更多傷害。"},
+        {text:"自己動手把刀拔出來，這樣後續搬運會比較方便安全", correct:false, explain:"救護人員同樣不應該自行拔除刺入的異物，原則對任何人都適用。"}
+      ]},
+    {type:"action", scene:"你決定固定刀身，避免搬運過程中移動。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"coverBurn",target:"chest",
+        explain:"用大量敷料堆疊固定在刀身周圍，讓刀子保持穩定不晃動，減少搬運過程中的移動與對周圍組織的二次傷害。"},
+      mistakes:[]},
+    {type:"action", scene:"固定完成後，你評估他的呼吸。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"lookListenFeel",target:"chest",respRate:30,
+        reading:"30次/分，患側胸廓起伏較對側減少，呼吸明顯費力",
+        explain:"胸部刺傷可能傷及肺臟造成氣胸，需要密切評估呼吸速率與品質，及早發現惡化跡象。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸評估後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"胸部穿刺傷合併呼吸窘迫，應給予高濃度氧氣支持，並準備快速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫途中。",
+      prompt:"你會持續注意什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測呼吸、意識與循環，胸部刺傷可能快速惡化成張力性氣胸（呼吸窘迫加劇、頸靜脈怒張、氣管偏移），一旦出現要立即回報並加速後送。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明受傷機轉（刺傷）、異物位置與固定情形、呼吸狀況變化，以及現場人身安全相關資訊，這些對外科團隊準備處置非常重要。"},
+      mistakes:[]}
+  ]
+});

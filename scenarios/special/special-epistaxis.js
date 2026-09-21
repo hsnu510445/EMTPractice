@@ -1,0 +1,43 @@
+SCENARIOS.push({
+  id:"special-epistaxis", category:"special", difficulty:1,
+  title:"流鼻血止不住的長者",
+  summary:"服用抗凝血藥物的長者流鼻血超過30分鐘止不住，練習正確的止血姿勢與加壓方式。",
+  steps:[
+    {type:"action", scene:"你到達時，一名78歲阿嬤坐在椅子上，用衛生紙搗著鼻子，紙已經濕透好幾張，家屬說已經流了超過30分鐘還沒停。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:distress"],
+        giFindings:{"patient:distress":"表情有點緊張，頭往後仰著，鼻血仍持續滲出"},
+        explain:"觀察她目前採取的姿勢，頭往後仰其實不是正確的止血姿勢，稍後需要調整。"},
+      mistakes:[]},
+    {type:"action", scene:"你想了解她的用藥狀況。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"history",target:"patient",
+        reading:"家屬表示她因心律不整長期服用抗凝血藥物，最近沒有調整劑量，也沒有明顯外傷病史",
+        explain:"長期服用抗凝血藥物會讓出血更不容易自行停止，這項資訊對判斷嚴重度與後續處置很重要。"},
+      mistakes:[]},
+    {type:"choice", scene:"你發現她一直維持頭往後仰的姿勢止血。",
+      question:"這個姿勢對止血有什麼影響？",
+      choices:[
+        {text:"頭往後仰會讓血液倒流到喉嚨，可能造成嗆咳或誤吞，正確做法應該是身體前傾、頭略向前，並直接捏住鼻翼軟骨處加壓止血", correct:true, explain:"這是流鼻血處置常見的迷思，頭往後仰不但無助於止血，還可能讓血液流入呼吸道或消化道造成不適。"},
+        {text:"頭往後仰是正確的止血姿勢，可以繼續保持這個姿勢直到血止住", correct:false, explain:"頭往後仰是常見的錯誤處置方式，血液倒流可能造成嗆咳，應該改為身體前傾。"},
+        {text:"姿勢對止血沒有實質影響，維持哪種姿勢都可以，重點只在有沒有壓住鼻子", correct:false, explain:"姿勢其實有實質影響，頭往後仰可能讓血液倒流造成嗆咳等問題，不能忽略姿勢的重要性。"},
+        {text:"應該讓她平躺下來，這樣比坐著或站著更有助於止血", correct:false, explain:"平躺同樣可能讓血液往喉嚨方向流，不是建議的止血姿勢，應維持坐姿並身體前傾。"}
+      ]},
+    {type:"action", scene:"你決定協助調整姿勢與加壓方式。",
+      prompt:"你會做什麼？",
+      correct:{tool:"coverBurn",target:"head",
+        explain:"請她身體前傾，用乾淨紗布捏住鼻翼軟骨處持續加壓至少10-15分鐘，中途不要鬆開查看，同時準備接收流出的血液避免弄髒衣物。"},
+      mistakes:[]},
+    {type:"action", scene:"持續加壓後。",
+      prompt:"接下來你會做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測出血是否減緩、生命徵象是否穩定，長期服用抗凝血藥物的患者即使表面出血量不算太大，仍建議送醫評估，避免持續性出血造成貧血或其他併發症。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明出血持續的時間、抗凝血藥物使用情形與加壓處置的反應，這些資訊對醫院後續處置很重要。"},
+      mistakes:[]}
+  ]
+});

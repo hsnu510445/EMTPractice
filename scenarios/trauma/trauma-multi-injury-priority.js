@@ -1,0 +1,52 @@
+SCENARIOS.push({
+  id:"trauma-multi-injury-priority", category:"trauma", difficulty:3,
+  title:"機車拋出傷患：多重外傷同時出現",
+  summary:"高速拋出傷患同時有大出血、意識下降與呼吸道問題，練習在多重威脅生命的傷勢中判斷正確順序，判斷錯誤可能造成無法挽回的後果。",
+  steps:[
+    {type:"action", scene:"機車與貨車擦撞，騎士被拋出約5公尺，你到達時他倒在路肩，意識模糊，左大腿有一處傷口血液持續噴湧，已在地上形成一灘血。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"確認車流已管制、現場相對安全，才能安全接近並開始處置。"},
+      mistakes:[]},
+    {type:"action", scene:"現場安全，你靠近他。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:distress","leftLeg:legWound"],
+        giFindings:{
+          "patient:distress":"意識越來越模糊，講話含糊不清，呼吸聽起來有點雜音",
+          "leftLeg:legWound":"左大腿有一處傷口，血液噴湧而出，地面已形成一灘血"
+        },
+        explain:"快速建立整體印象，同時掌握意識、呼吸道與出血這三個同時存在的威脅。"},
+      mistakes:[]},
+    {type:"choice", scene:"他左大腿傷口血液持續噴湧、意識越來越模糊，呼吸聽起來有些雜音但還算聽得到氣流進出。",
+      question:"三個問題同時出現，你會優先處理哪一個？",
+      choices:[
+        {text:"優先控制噴湧的大腿出血，這種大量動脈出血可能在幾分鐘內造成致命的失血性休克，比目前還聽得到氣流的呼吸道更緊急，同時持續觀察意識與呼吸變化", correct:true, explain:"當呼吸道還有氣流進出、尚未完全阻塞時，明顯致命的大出血（噴湧、快速失血）往往比呼吸道更迫切，延誤控制可能讓病人在幾分鐘內休克死亡。"},
+        {text:"嚴格依照ABC評估順序，先確認呼吸道完全暢通、正式評估呼吸後，才回頭處理出血問題", correct:false, explain:"嚴格死守固定順序、忽略正在噴湧且可能致命的大出血，可能讓病人在你完成呼吸道評估前就已經因為失血過多而休克，遇到明顯致命大出血時應優先控制。"},
+        {text:"先詳細詢問他的病史與受傷經過，掌握完整資訊後再決定要優先處理哪一項", correct:false, explain:"意識越來越模糊、出血持續噴湧時，沒有時間進行詳細病史詢問，應立即針對最致命的問題採取行動。"},
+        {text:"三個問題同時處理，自己一個人同時進行止血、打開呼吸道與評估意識程度", correct:false, explain:"現場人力有限時不可能真正同時完成三件事，勉強同時處理反而可能三個都做不好，應該依照嚴重度判斷出優先順序。"}
+      ]},
+    {type:"action", scene:"你決定立即處理大腿的出血。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"directPressure",target:"leftLeg",explain:"先以直接加壓嘗試控制出血，這是控制大出血最快能執行的第一步。"},
+      mistakes:[]},
+    {type:"action", scene:"直接加壓後，血液仍持續大量湧出，紗布很快就濕透。",
+      prompt:"此時你會怎麼做？",
+      correct:{tool:"tourniquet",target:"leftLeg",explain:"直接加壓無法控制的肢體大出血，應立即使用止血帶，並記錄使用時間，止血帶延誤使用同樣可能讓病人錯失搶救機會。"},
+      mistakes:[]},
+    {type:"action", scene:"止血帶控制住出血後，你回頭評估他的呼吸道。",
+      prompt:"你會做什麼？",
+      correct:{tool:"openAirway",target:"head",explain:"控制住立即致命的大出血後，接著處理呼吸道，確保呼吸道暢通、必要時考慮輔助呼吸道裝置。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸道處理後，他的意識程度似乎更差了。",
+      prompt:"你會用什麼工具重新評估他的意識？",
+      correct:{tool:"gcsCheck",target:"patient",gcsSpec:{e:2,v:2,m:4},
+        reading:"GCS 8分（E2 V2 M4），較先前明顯下降",
+        explain:"意識程度持續下降是需要高度警覺的變化，GCS下降合併大量失血與可能的頭部外傷，需要儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明處理的優先順序、止血帶使用時間、呼吸道處置經過，以及GCS從評估到送醫前的變化趨勢，這些資訊對醫院判斷病情惡化速度非常關鍵。"},
+      mistakes:[]}
+  ]
+});

@@ -1,0 +1,60 @@
+SCENARIOS.push({
+  id:"trauma-unconscious-unknown", category:"trauma", difficulty:3,
+  title:"路邊昏迷的不明外傷患者",
+  summary:"路人發現一名男子昏迷倒地，沒有任何目擊者能說明發生什麼事，練習只靠身體檢查判斷傷勢，任何遺漏都可能造成嚴重後果。",
+  steps:[
+    {type:"action", scene:"路人報案發現一名中年男子倒臥在巷口，完全沒有反應，附近沒有監視器，也沒有人目擊發生什麼事。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"不明原因倒地的現場可能有未知的危險因子（藥物、氣體、暴力事件遺留物等），先確認環境安全再接觸。"},
+      mistakes:[]},
+    {type:"action", scene:"確認安全後，你靠近他。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:posture","head:scalp"],
+        giFindings:{
+          "patient:posture":"呈現不自然的蜷曲姿勢倒在地上",
+          "head:scalp":"頭皮有一處撕裂傷，周圍有些血跡"
+        },
+        explain:"建立整體印象，觀察姿勢與外觀線索，在缺乏病史的情況下，這些線索是你僅有的判斷依據。"},
+      mistakes:[]},
+    {type:"choice", scene:"完全沒有目擊者、也無法從病人口中得知發生什麼事，同事問你「這樣要怎麼判斷該怎麼處理？」",
+      question:"你會怎麼回答？",
+      choices:[
+        {text:"在無法確認傷病機轉的情況下，應假設最壞的可能性並採取相應防護（如懷疑脊椎損傷維持頭頸中立），透過完整的身體檢查尋找線索，不能因為缺乏病史就降低警覺", correct:true, explain:"沒有病史不代表可以放鬆警覺，反而更需要靠完整檢查與保守假設來補足資訊不足的風險。"},
+        {text:"既然沒有目擊者說明狀況，先當作單純昏厥處理，不特別考慮外傷的可能性", correct:false, explain:"頭皮傷口與不自然的倒地姿勢已經提示可能有外傷，不應該直接排除外傷的可能。"},
+        {text:"先花時間聯絡附近店家調閱監視器畫面，確認事發經過後再開始評估與處置", correct:false, explain:"病人目前情況危急，不應該為了查證經過而延誤評估與處置的時機。"},
+        {text:"沒有病史代表沒有可靠資訊可以判斷，這種情況應該等家屬或警方到場後再開始處置", correct:false, explain:"等待期間病人可能持續惡化，不應該因為缺乏病史就delayed開始必要的評估與處置。"}
+      ]},
+    {type:"action", scene:"考量可能有脊椎損傷。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"manualStabilization",target:"neck",explain:"機轉不明、意識不清的患者，應以徒手固定頭頸中立作為保守假設，直到能排除或完成適當固定裝置。"},
+      mistakes:[]},
+    {type:"action", scene:"你想進一步評估他的神經學狀態。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"penlight",target:"head",
+        reading:"雙側瞳孔大小不一致，左側瞳孔明顯比右側放大",
+        explain:"瞳孔檢查是意識不清患者神經學評估的重要一環。"},
+      mistakes:[]},
+    {type:"choice", scene:"你發現他雙側瞳孔大小明顯不一致。",
+      question:"這個發現代表什麼，為什麼需要特別警覺？",
+      choices:[
+        {text:"瞳孔不等大合併意識不清，是顱內壓升高、可能出現腦部結構受壓迫的危險警訊，應視為最高優先，儘速送醫並持續密切監測意識與瞳孔變化", correct:true, explain:"瞳孔不等大是嚴重顱內病變的重要警訊，若不及時處理送醫，可能在短時間內演變成無法挽回的腦部損傷。"},
+        {text:"瞳孔大小不一致是常見的正常生理差異，很多人本來瞳孔就不太對稱，不需要特別在意", correct:false, explain:"合併意識不清出現的瞳孔不等大，是需要高度警覺的異常表現，不應該當作正常生理差異忽略。"},
+        {text:"瞳孔的變化只有在病人清醒時才有參考意義，意識不清時瞳孔檢查結果不可靠，可以先不理會", correct:false, explain:"意識不清時的瞳孔變化反而是重要的神經學評估依據，不應該忽略這項發現。"},
+        {text:"這個發現要等送到醫院用儀器詳細檢查後才能確定意義，現場不需要特別處理或加速送醫", correct:false, explain:"現場發現瞳孔不等大就應該提高警覺並儘速送醫，不應該等到院後才開始重視。"}
+      ]},
+    {type:"action", scene:"你決定完成身體檢查。",
+      prompt:"你會做什麼？",
+      correct:{tool:"rapidTraumaExam",target:"patient",explain:"完整的頭到腳快速創傷評估，能幫助你在缺乏病史的情況下找出更多可能被忽略的傷勢。"},
+      mistakes:[]},
+    {type:"action", scene:"檢查完成，準備搬運送醫。",
+      prompt:"你會做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",explain:"持續監測意識、瞳孔與生命徵象的變化趨勢，任何惡化都要立即回報，並儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明發現時的姿勢與現場線索、瞳孔不等大的發現時間、GCS與生命徵象的變化趨勢，這些資訊對醫院判斷顱內狀況非常關鍵。"},
+      mistakes:[]}
+  ]
+});

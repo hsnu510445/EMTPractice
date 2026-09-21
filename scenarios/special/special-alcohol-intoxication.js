@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-alcohol-intoxication", category:"special", difficulty:2,
+  title:"深夜路倒的酒醉男子",
+  summary:"深夜路倒、身上有濃厚酒味的男子，練習不要只憑酒味就排除其他更危險的意識改變原因。",
+  steps:[
+    {type:"action", scene:"凌晨你接獲通報，一名中年男性倒臥在便利商店旁的人行道上，路人說靠近時聞到濃厚酒味，叫他也沒什麼反應。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"深夜路邊倒地案件要留意車流、周遭人員狀況與地面是否濕滑等環境因素，確保自身安全再接近。"},
+      mistakes:[]},
+    {type:"action", scene:"確認安全後，你靠近他。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:odor","patient:posture"],
+        giFindings:{
+          "patient:odor":"身上有濃厚的酒味",
+          "patient:posture":"四肢攤開倒臥在地上，衣著略顯凌亂"
+        },
+        explain:"建立整體印象，觀察氣味與姿勢，但不要因為聞到酒味就提前下結論。"},
+      mistakes:[]},
+    {type:"action", scene:"你呼喚他的名字。",
+      prompt:"你會評估什麼？",
+      correct:{tool:"verbalCheck",target:"patient",explain:"依初步評估順序先確認意識程度（AVPU）。"},
+      mistakes:[]},
+    {type:"choice", scene:"他對聲音有反應但答非所問，講話含糊，身上有濃厚酒味。",
+      question:"這樣的表現，能直接當作單純酒醉處理嗎？",
+      choices:[
+        {text:"不能只憑酒味就排除其他病因，意識改變合併酒味時仍應優先排除低血糖、頭部外傷或其他中毒等更危險的原因，完整評估後才考慮是單純酒醉", correct:true, explain:"酒味容易讓人先入為主，但低血糖、頭部外傷、其他物質併用等狀況可能合併存在，甚至比酒醉本身更危險，不應該被酒味掩蓋。"},
+        {text:"身上有濃厚酒味就可以直接認定是單純喝醉了，不需要再做進一步評估", correct:false, explain:"酒味不能排除合併其他更危險狀況的可能，仍需要完整評估。"},
+        {text:"只要他還有呼吸、生命徵象看起來穩定，就可以先讓他在原地睡到自然清醒", correct:false, explain:"意識改變合併酒味的患者仍需要完整評估與觀察，不應該就地放著等清醒。"},
+        {text:"路倒合併酒味的個案，經驗上通常不需要送醫評估，等他清醒後自行離開就好", correct:false, explain:"意識程度異常的患者不應該只憑經驗判斷不需要送醫，仍須完整評估後再決定。"}
+      ]},
+    {type:"action", scene:"你決定進一步評估，排除低血糖的可能。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"glucometer",target:"leftArm",altTargets:["rightArm"],
+        reading:"血糖值 92 mg/dL",
+        explain:"意識改變合併酒味時，血糖是必須排除的重要項目之一，低血糖與酒醉的表現可能非常相似。"},
+      mistakes:[]},
+    {type:"action", scene:"血糖確認後，你想確認有沒有其他外傷。",
+      prompt:"你會做什麼？",
+      correct:{tool:"rapidTraumaExam",target:"patient",explain:"倒地的患者可能在跌倒過程中合併頭部外傷或其他損傷，需要完整檢查頭到腳，不能因為看起來像單純酒醉就省略。"},
+      mistakes:[]},
+    {type:"action", scene:"檢查完成，沒有發現明顯外傷，他仍然意識不清、對答不清楚。",
+      prompt:"你會協助他採取什麼姿勢？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"recovery"},
+        explain:"意識不清的患者有嘔吐物嗆入呼吸道的風險，應採復甦姿勢（側躺），保持呼吸道通暢。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明發現時的意識程度、血糖數值、身體檢查發現與姿勢處置，這些資訊能幫助醫院排除酒醉以外的其他病因。"},
+      mistakes:[]}
+  ]
+});

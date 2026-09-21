@@ -1,0 +1,50 @@
+SCENARIOS.push({
+  id:"trauma-elderly-lift-assist", category:"trauma", difficulty:1,
+  title:"在家跌倒起不來的獨居阿嬤",
+  summary:"獨居長者在家跌倒後爬不起來，可能已經倒地一段時間，練習長時間倒地的相關風險評估。",
+  steps:[
+    {type:"action", scene:"鄰居報案說81歲獨居阿嬤在家跌倒，電話裡聽起來意識清楚，但爬不起來，不確定倒地多久了。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"獨居長者住家環境可能有雜物或照明不足等跌倒風險因子，進門前先留意環境安全。"},
+      mistakes:[]},
+    {type:"action", scene:"你進門後看到阿嬤坐倒在浴室門口，地上有點濕，她意識清楚，說自己是去上廁所時滑倒的。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:posture","patient:skinColor"],
+        giFindings:{
+          "patient:posture":"坐倒在地上，右髖部附近姿勢看起來有點不自然",
+          "patient:skinColor":"皮膚看起來有點乾燥，嘴唇也略顯乾裂"
+        },
+        explain:"觀察她倒地的姿勢與皮膚狀況，長時間倒地可能合併脫水與體溫變化等問題，不只是單純的跌倒外傷。"},
+      mistakes:[]},
+    {type:"choice", scene:"你詢問她大概倒地多久了，她想了一下說「好像從剛剛天還沒全亮就這樣了吧，我也不太確定」。",
+      question:"「可能倒地很長一段時間」這個資訊，對你的評估有什麼意義？",
+      choices:[
+        {text:"長時間倒地不動的長者，除了跌倒本身造成的外傷外，還要考慮脫水、體溫過低、肌肉受壓造成的橫紋肌溶解等併發症，評估時不能只關注明顯的外傷部位", correct:true, explain:"長時間倒地（long lie）本身就是一個需要注意的警訊，可能合併脫水、體溫變化與局部受壓造成的併發症，是評估長者跌倒時容易被忽略的重點。"},
+        {text:"倒地時間長短其實不重要，只要看得到的外傷處理好就沒有問題了", correct:false, explain:"倒地時間長短會影響是否合併脫水、體溫變化等其他問題，不能只處理看得到的外傷。"},
+        {text:"只要她現在意識清楚、能正常對答，就代表倒地這段時間完全沒有造成任何影響", correct:false, explain:"意識清楚不代表沒有合併脫水或局部受壓等其他問題，仍需要完整評估。"},
+        {text:"這類獨居長者跌倒的案件，倒地時間的資訊主要是社工轉介會用到，跟你的醫療評估沒有關係", correct:false, explain:"倒地時間對你當下的醫療評估同樣重要，不是只有社工轉介才需要這項資訊。"}
+      ]},
+    {type:"action", scene:"你決定評估她的髖部。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"pulseCheck",target:"rightLeg",altTargets:["leftLeg"],
+        reading:"足背動脈可觸及，腳趾膚色正常但她表示右髖部一動就劇痛，無法承重站立",
+        explain:"評估患肢遠端的循環、感覺與活動，合併劇痛與無法承重是懷疑髖部骨折的重要警訊，長者髖部骨折相當常見且需要謹慎搬運。"},
+      mistakes:[]},
+    {type:"action", scene:"確認循環後。",
+      prompt:"你會怎麼固定她？",
+      correct:{tool:"splint",target:"rightLeg",altTargets:["leftLeg"],
+        explain:"以夾板固定發現時的姿勢，不強行移動或矯正，避免加重疼痛與可能的損傷。"},
+      mistakes:[]},
+    {type:"action", scene:"固定完成，準備搬運。",
+      prompt:"你還會協助她做什麼？",
+      correct:{tool:"blanket",target:"patient",
+        explain:"長時間倒地的長者容易合併體溫下降，搬運前後都應該注意保暖，同時持續觀察意識與生命徵象。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明發現時的狀況、可能的倒地時間、患肢評估結果與是否有脫水或體溫變化的跡象，這些資訊對醫院評估長者跌倒的整體狀況很重要。"},
+      mistakes:[]}
+  ]
+});

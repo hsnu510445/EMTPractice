@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-copd-exacerbation", category:"special", difficulty:2,
+  title:"老菸槍爺爺喘不過氣",
+  summary:"慢性阻塞性肺病患者急性呼吸困難惡化，練習COPD給氧時需要留意的重點，跟一般呼吸困難不完全相同。",
+  steps:[
+    {type:"action", scene:"你到達時，一名70歲有多年抽菸史的阿公坐在客廳沙發上，身體前傾、嘴唇微微發紫，呼吸看起來很費力。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:distress","patient:skinColor"],
+        giFindings:{
+          "patient:distress":"身體前傾、用力呼吸，說話只能講幾個字就要喘一下",
+          "patient:skinColor":"嘴唇與指尖看起來有點發紫"
+        },
+        explain:"觀察他的呼吸姿勢與膚色，身體前傾用力呼吸是慢性呼吸道疾病患者常見的代償姿勢。"},
+      mistakes:[]},
+    {type:"action", scene:"你評估他的呼吸。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"lookListenFeel",target:"chest",respRate:26,
+        reading:"26次/分，呼氣時間明顯延長，合併喘鳴聲",
+        explain:"呼氣時間延長合併喘鳴，是慢性阻塞性肺病（COPD）呼吸道阻力增加的典型表現。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸評估後。",
+      prompt:"你會用什麼工具評估他的血氧？",
+      correct:{tool:"pulseOximeter",target:"leftArm",altTargets:["rightArm"],
+        reading:"SpO2 86%，脈搏 108次/分",
+        explain:"血氧明顯偏低，需要給氧支持，但COPD病人的給氧方式跟一般病人有些不同，需要謹慎。"},
+      mistakes:[]},
+    {type:"choice", scene:"家屬看你準備給氧，急著說「醫生說他這個病不能給太多氧氣，會有問題」。",
+      question:"這個提醒對你的處置有什麼意義？",
+      choices:[
+        {text:"部分COPD患者呼吸驅動對低血氧較敏感，過高濃度氧氣可能抑制呼吸驅動，應給予能改善血氧的氧氣並密切觀察", correct:true, explain:"這是COPD病人給氧時的重要臨床考量，需要在缺氧與過度給氧之間謹慎拿捏，並非完全不能給氧，而是要謹慎調整並持續觀察。"},
+        {text:"這只是家屬的誤解，COPD病人跟一般病人完全一樣，直接給予最高濃度氧氣就對了", correct:false, explain:"COPD病人給氧確實需要比一般病人更謹慎地考量，家屬的提醒有其臨床根據，不應該完全忽略。"},
+        {text:"既然家屬這樣說，血氧這麼低也先完全不要給氧，等送到醫院再處理比較安全", correct:false, explain:"血氧86%已經明顯偏低，完全不給氧同樣有風險，應該是謹慎調整給氧方式，而不是完全不給。"},
+        {text:"這種病人的血氧問題其實跟給氧濃度沒有關係，家屬的說法沒有任何根據", correct:false, explain:"這個提醒確實有臨床上的根據，不應該直接認定完全沒有意義。"}
+      ]},
+    {type:"action", scene:"你決定給氧。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nasalCannula", flowMin:1, flowMax:4},
+        explain:"COPD病人常先以較低流量的鼻導管給氧，目標是改善血氧到適當範圍，同時持續密切觀察呼吸狀況與意識程度，依反應調整。"},
+      mistakes:[]},
+    {type:"action", scene:"給氧後。",
+      prompt:"接下來你會做什麼？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"semiFowler"},
+        explain:"半坐臥或維持他自己覺得比較好呼吸的前傾坐姿，有助於減少呼吸負擔。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明COPD病史、給氧的裝置與流量、給氧後的血氧變化與意識反應，這些資訊對醫院後續調整氧氣治療非常重要。"},
+      mistakes:[]}
+  ]
+});
