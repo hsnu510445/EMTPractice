@@ -1,0 +1,60 @@
+SCENARIOS.push({
+  id:"special-postpartum-hemorrhage", category:"special", difficulty:5,
+  title:"生產後大出血合併意識模糊的產婦",
+  summary:"在家生產後產婦持續大量出血、意識越來越模糊，練習辨識產後大出血的嚴重度並同時照顧產婦與新生兒兩個病人。",
+  steps:[
+    {type:"action", scene:"你到達時，寶寶已經在你們抵達前十分鐘出生，由家屬簡單包裹著，媽媽躺在床上，床單有大片血跡持續擴散，她說自己有點頭暈。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:skinColor","patient:distress"],
+        giFindings:{
+          "patient:skinColor":"臉色蒼白，額頭冒著冷汗",
+          "patient:distress":"講話有點喘、意識看起來有點恍惚"
+        },
+        explain:"建立整體印象，這個情境你同時要照顧產婦與新生兒兩位病人，先掌握產婦目前最緊急的狀況。"},
+      mistakes:[]},
+    {type:"choice", scene:"家屬說「生產的時候流血是正常的吧？」，血跡持續在擴散中。",
+      question:"你會怎麼判斷這個出血量是否正常？",
+      choices:[
+        {text:"產後確實會有一定量的出血，但持續大量擴散、合併頭暈、冒冷汗、意識恍惚等表現，已經超出正常產後出血的範圍，應視為產後大出血，是需要立即積極處置的危急狀況", correct:true, explain:"產後大出血是分娩相關死亡的重要原因之一，合併循環代償徵象（冒冷汗、意識改變）時，代表出血量已經達到危險程度，需要立即處置。"},
+        {text:"生產本來就會流血，只要產婦還有意識、還能講話，這樣的出血量就一定是正常範圍", correct:false, explain:"合併冒冷汗、意識恍惚等徵象，已經不是單純的正常產後出血，需要提高警覺。"},
+        {text:"應該先處理新生兒，產婦的出血狀況可以先放著，等新生兒穩定後再回頭處理", correct:false, explain:"產婦目前已經出現循環代償徵象，屬於立即需要處理的狀況，不應該完全擱置不理。"},
+        {text:"床單上血跡的擴散範圍不能用來判斷出血嚴重度，只有抽血檢查數字才有參考價值", correct:false, explain:"現場觀察到的出血擴散範圍合併其他生命徵象變化，是現場評估出血嚴重度的重要依據，不能忽略。"}
+      ]},
+    {type:"action", scene:"你決定評估她的生命徵象。",
+      prompt:"你會先測量什麼？",
+      correct:{tool:"bloodPressure",target:"leftArm",altTargets:["rightArm"],
+        reading:"84/56 mmHg，脈搏 128次/分",
+        explain:"血壓偏低合併心跳明顯偏快，確認她已經進入休克代償的階段，需要立即積極處置。"},
+      mistakes:[]},
+    {type:"action", scene:"確認生命徵象後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"產後大出血合併休克徵象，應給予高濃度氧氣支持。"},
+      mistakes:[]},
+    {type:"action", scene:"給氧後。",
+      prompt:"你會協助她採取什麼姿勢？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"supineLegsRaised"},
+        explain:"懷疑休克時，平躺並抬高下肢有助於增加回心血流量。"},
+      mistakes:[]},
+    {type:"choice", scene:"處理產婦的同時，你注意到新生兒被家屬放在一旁，還沒有特別保暖處理，也還沒剪臍帶。",
+      question:"這時候你會怎麼分配自己的處置順序？",
+      choices:[
+        {text:"優先確保有人（自己或請同伴／家屬協助）立即為新生兒擦乾保暖，避免新生兒體溫快速流失，同時自己持續處理產婦的大出血，兩位病人不能有一位完全被忽略", correct:true, explain:"這個情境你同時要照顧兩位病人，新生兒的保暖同樣刻不容緩，應該善用現場所有人力，確保兩邊都有人在照顧，而不是完全專注在其中一位身上。"},
+        {text:"先完全處理好產婦的出血問題，新生兒可以先放著，等產婦狀況穩定後再回頭處理", correct:false, explain:"新生兒體溫流失的風險同樣緊急，不應該完全被擱置到產婦處理完才開始照顧。"},
+        {text:"先放下產婦的處置，優先幫新生兒剪臍帶、完成保暖，這是新生兒最需要立即處理的事", correct:false, explain:"產婦目前已經有明顯的休克徵象，不應該完全放下她的處置去優先照顧新生兒。"},
+        {text:"兩位病人都交給家屬自行照顧，你專心聯絡醫院說明狀況並等待支援抵達", correct:false, explain:"不應該把病人的直接照顧完全交給未受訓練的家屬，救護人員應該善用現場人力同時兼顧兩位病人。"}
+      ]},
+    {type:"action", scene:"你請家屬協助新生兒保暖，自己持續照顧產婦。",
+      prompt:"接下來你會做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測產婦的意識、出血量變化與生命徵象，並儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫，母親與新生兒一起。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明分娩的時間、出血量與持續擴散情形、生命徵象變化趨勢，以及新生兒目前的狀況，讓醫院能同時準備母嬰兩邊的處置團隊。"},
+      mistakes:[]}
+  ]
+});

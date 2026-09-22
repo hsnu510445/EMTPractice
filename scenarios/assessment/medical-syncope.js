@@ -23,6 +23,10 @@ SCENARIOS.push({
     {type:"action", scene:"患者表示最近開始服用新的降血壓藥。",
       prompt:"你會使用什麼方式進一步收集資訊？",
       correct:{tool:"history",target:"patient",reading:"近期開始使用新的降血壓藥，今天起身後發生短暫意識喪失",explain:"使用結構化病史詢問了解用藥、過去病史、事件經過等資訊。"},mistakes:[]},
+    {type:"action", scene:"病史問完後，你想確認有沒有遺漏其他項目。",
+      prompt:"你會做什麼？",
+      correct:{tool:"secondaryAssessment",target:"patient",explain:"用二次評估的完整骨架（生命徵象、病史、身體檢查、後續處置計畫）檢查一遍，確認暈厥評估沒有遺漏重點項目。"},
+      mistakes:[]},
     {type:"action", scene:"等待送醫期間。",
       prompt:"你會做什麼？",
       correct:{tool:"ongoingMonitor",target:"patient",explain:"持續監測意識、呼吸與生命徵象，若再次改變應立即重新評估。"},mistakes:[]}

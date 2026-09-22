@@ -1,0 +1,50 @@
+SCENARIOS.push({
+  id:"trauma-entrapment-fire-risk", category:"trauma", difficulty:5,
+  title:"車輛起火風險下的受困傷患",
+  summary:"車禍傷患受困車內，引擎室冒煙有起火疑慮，救援時間有限，練習在時間壓力下做出不躁進也不拖延的判斷。",
+  steps:[
+    {type:"action", scene:"轎車撞上護欄後駕駛受困在變形的車體內，消防正在準備破壞車體，引擎蓋縫隙開始冒出白煙，還沒有明火。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"確認冒煙狀況、與消防確認風險評估、確保自己與傷患的相對安全距離，不能只憑肉眼判斷就貿然靠近或遠離。"},
+      mistakes:[]},
+    {type:"choice", scene:"消防隊長告訴你「引擎室冒煙不確定會不會真的起火，破壞車體大概還要3-5分鐘，你要現在硬拉他出來嗎？」",
+      question:"你會怎麼回應？",
+      choices:[
+        {text:"沒有立即明火、消防正在進行專業破壞作業時不貿然拉扯傷患脫困；與消防保持密切溝通，一旦出現明火立即重新評估", correct:true, explain:"貿然拉扯受困傷患可能造成額外的嚴重損傷，除非有立即明確的致命危險（如明火），否則應該讓專業的破壞脫困作業進行，同時做好隨時應變明火出現的準備。"},
+        {text:"立即不管消防作業，自己動手用力把傷患拉出車外，安全永遠比損傷風險更重要", correct:false, explain:"目前還沒有立即明火，貿然用力拉扯可能造成更嚴重的損傷，這個判斷過於躁進。"},
+        {text:"既然還沒有明火，代表完全沒有風險，可以放心等消防慢慢完成作業就好", correct:false, explain:"冒煙代表仍有起火的風險存在，不能因為還沒明火就完全放鬆警覺，需要持續留意狀況變化。"},
+        {text:"要求消防隊立即停止所有作業，等你先完整評估傷患狀況後才能繼續脫困", correct:false, explain:"這種情況下時間有限，評估與脫困作業應該同步進行，而不是要求消防完全停下等待。"}
+      ]},
+    {type:"action", scene:"你決定在車外能觸及的範圍先做初步評估。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"verbalCheck",target:"patient",explain:"在無法完整接觸傷患的情況下，先確認意識程度，這是能立即取得、最重要的資訊之一。"},
+      mistakes:[]},
+    {type:"action", scene:"他意識清楚，能跟你對話，說胸口很痛、腳被卡住動不了。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"manualStabilization",target:"neck",explain:"在等待脫困的同時，盡可能徒手維持頭頸中立，減少受困期間頭頸部不必要的晃動。"},
+      mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.5,
+      scene:"就在消防持續作業時，引擎蓋縫隙突然竄出一小段火苗！",
+      question:"這個瞬間，你會怎麼判斷？",
+      choices:[
+        {text:"立即與消防確認狀況，若無法立即撲滅、有燒傷或爆炸風險，配合消防緊急徒手脫困，脊椎保護原則此時退居其次", correct:true, explain:"明火出現代表危險等級已經改變，這時候「立即脫離致命危險」比維持理想的脊椎固定程序更優先，這是創傷處置中少數會調整優先順序的情況之一。"},
+        {text:"火苗還很小，應該繼續等消防按原計畫完成標準破壞脫困程序就好", correct:false, explain:"明火出現代表風險已經升高，應該重新評估是否需要更緊急的處置方式，不應該完全照原計畫不變。"},
+        {text:"自己衝上前嘗試撲滅火苗，確保安全後再讓消防繼續作業", correct:false, explain:"滅火是消防的專業，救護人員貿然嘗試滅火可能讓自己也暴露在危險中。"},
+        {text:"立即放棄這名傷患，帶其他人員撤離到安全距離，等火勢撲滅後再回來", correct:false, explain:"在消防人員仍在進行救援的情況下不應該直接放棄傷患，應該配合消防採取合適的緊急應變措施。"}
+      ]},
+    {type:"action", scene:"消防迅速撲滅火苗並完成緊急脫困，傷患安全脫離車輛。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"rapidTraumaExam",target:"patient",explain:"脫困後立即進行頭到腳的快速創傷評估，確認受困期間可能造成或加重的傷勢。"},
+      mistakes:[]},
+    {type:"action", scene:"評估後準備固定搬運。",
+      prompt:"你會怎麼做？",
+      transportSim:true,
+      correct:{tool:"spineBoard",target:"patient",explain:"即使剛才因應緊急狀況調整了處置順序，脫離立即危險後仍應盡快完成適當的脊椎固定，再儘速送醫。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明受困時間、是否曾經因應明火而調整脊椎保護程序、脫困過程中傷患的反應變化，這些資訊對醫院評估非常重要。"},
+      mistakes:[]}
+  ]
+});

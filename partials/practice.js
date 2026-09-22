@@ -60,6 +60,24 @@ document.write(`
             </div>
           </div>
 
+          <div class="tray-wrap" id="primaryAssessWrap">
+            <div class="monitor-panel">
+              <h4>初次評估：依序完成每一項</h4>
+              <p class="checklist-hint">意識 → 呼吸道 → 呼吸 → 循環 → 決定送醫優先度，這是到院前評估最基本的骨架，練習到能不假思索地照順序做完。</p>
+              <div class="monitor-checklist" id="primaryAssessChecklist"></div>
+              <button class="btn btn-primary" id="primaryAssessConfirmBtn" disabled>完成初次評估</button>
+            </div>
+          </div>
+
+          <div class="tray-wrap" id="secondaryAssessWrap">
+            <div class="monitor-panel">
+              <h4>二次評估：依序完成每一項</h4>
+              <p class="checklist-hint">初次評估確認沒有立即威脅生命的問題後，才進入二次評估，做更完整的生命徵象、病史與身體檢查。</p>
+              <div class="monitor-checklist" id="secondaryAssessChecklist"></div>
+              <button class="btn btn-primary" id="secondaryAssessConfirmBtn" disabled>完成二次評估</button>
+            </div>
+          </div>
+
           <div class="kit-row">
             <div class="kit-item" id="bagItem"><span class="kit-icon" id="bagIcon"></span><span class="lbl">急救包</span></div>
             <div class="kit-item" id="o2Item"><span class="kit-icon" id="o2Icon"></span><span class="lbl">氧氣鋼瓶</span></div>

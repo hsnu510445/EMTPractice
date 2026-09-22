@@ -1,0 +1,60 @@
+SCENARIOS.push({
+  id:"trauma-pregnant-mvc", category:"trauma", difficulty:5,
+  title:"懷孕後期孕婦的車禍外傷",
+  summary:"懷孕36週的孕婦發生車禍，你要同時照顧母親與胎兒兩個病人，一個處置細節沒注意到可能同時影響兩條生命。",
+  steps:[
+    {type:"action", scene:"轎車追撞事故，駕駛是一名懷孕36週的女性，安全帶有繫但腹部撞到方向盤，意識清楚，主訴腹部緊繃疼痛。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["abdomen:contraction","patient:distress"],
+        giFindings:{
+          "abdomen:contraction":"腹部摸起來很緊繃，她說像是持續的悶痛，跟宮縮的感覺不太一樣",
+          "patient:distress":"表情痛苦、有點喘，一直用手護著肚子"
+        },
+        explain:"建立整體印象，這個情境要同時評估母親與腹中胎兒兩個病人，腹部的表現是重要線索。"},
+      mistakes:[]},
+    {type:"choice", scene:"你準備讓她平躺在擔架上評估。",
+      question:"懷孕後期的孕婦，平躺姿勢對她有什麼特別需要注意的地方？",
+      choices:[
+        {text:"懷孕後期子宮會壓迫下腔靜脈，完全平躺可能讓血壓下降，應讓她採左側傾斜、或在右側臀部墊高讓子宮偏離下腔靜脈", correct:true, explain:"這是懷孕後期創傷病人特別需要注意的細節，忽略這點可能讓母親血壓不明原因下降，進而影響胎盤血流。"},
+        {text:"懷孕後期的孕婦平躺跟一般病人完全一樣，不需要特別調整姿勢處理", correct:false, explain:"懷孕後期平躺可能造成仰臥性低血壓，這是需要特別注意調整的重點。"},
+        {text:"應該讓她採坐姿觀察，完全不要平躺，這樣對母親與胎兒都比較安全", correct:false, explain:"創傷病人若懷疑脊椎或其他嚴重損傷，仍需要適當的平躺固定，重點是調整成左側傾斜，而不是完全不平躺。"},
+        {text:"只要她自己覺得舒服的姿勢就可以，不需要考慮懷孕帶來的特殊影響", correct:false, explain:"懷孕後期姿勢對母體循環有實質影響，不能只憑病人主觀舒適度決定。"}
+      ]},
+    {type:"action", scene:"你協助她調整姿勢。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"positionPatient",target:"patient",positionSpec:{position:"recovery"},
+        explain:"以側傾姿勢（此處以復甦姿勢/側躺概念調整）讓子宮偏離下腔靜脈，若懷疑脊椎損傷則需要在固定板上墊高一側達到同樣效果。"},
+      mistakes:[]},
+    {type:"action", scene:"你評估她的生命徵象。",
+      prompt:"你會先測量什麼？",
+      correct:{tool:"bloodPressure",target:"leftArm",altTargets:["rightArm"],
+        reading:"98/62 mmHg，脈搏 116次/分",
+        explain:"懷孕後期孕婦的血液容積本來就會增加，代償能力較好，即使已經有一定程度的失血，血壓可能仍維持看似「還可以」的範圍，需要提高警覺。"},
+      mistakes:[]},
+    {type:"choice", scene:"她說腹部持續緊繃悶痛，跟先前產檢時感受到的宮縮不太一樣，你也注意到內褲有一點點深色分泌物。",
+      question:"這些發現讓你需要優先考慮什麼？",
+      choices:[
+        {text:"疑似胎盤早期剝離，這是懷孕後期腹部鈍傷後的危險併發症，可能同時威脅母親（大出血）與胎兒（血流中斷）的生命，需要當作高風險狀況儘速送醫", correct:true, explain:"腹部撞擊合併持續性腹痛（非典型宮縮型態）與異常分泌物，是胎盤早期剝離的警訊，這是孕婦腹部外傷後最需要優先考慮排除的嚴重併發症之一。"},
+        {text:"這應該只是提前出現的正常產兆，跟車禍撞擊沒有直接關係，可以先不用特別緊張", correct:false, explain:"腹部撞擊後出現的持續性腹痛與異常分泌物，需要優先考慮跟外傷相關的嚴重併發症，不應該直接當作正常產兆處理。"},
+        {text:"只要胎兒還有胎動的感覺，就可以代表目前狀況沒有立即的危險", correct:false, explain:"胎盤剝離的初期胎兒可能仍有胎動，不能單憑這一點就排除嚴重併發症的可能。"},
+        {text:"這個資訊主要留給到院後的婦產科醫師判斷即可，救護階段不需要特別放在交班重點裡", correct:false, explain:"這是救護階段就應該提高警覺並在交班時重點說明的資訊，能幫助醫院提前準備。"}
+      ]},
+    {type:"action", scene:"你決定給予氧氣支持。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"懷疑胎盤剝離合併母體代償性休克徵象，應給予高濃度氧氣，同時維持母體充足的氧氣供應，這對胎兒的氧氣供應也很重要。"},
+      mistakes:[]},
+    {type:"action", scene:"準備送醫，途中你會？",
+      prompt:"你應該持續做什麼？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測母親的生命徵象、腹部疼痛與出血變化，同時儘速送往有產科與新生兒急救能力的醫院。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明妊娠週數、腹部撞擊機轉、疼痛型態與異常分泌物的發現、姿勢處置與生命徵象變化，這些資訊對產科團隊同時評估母親與胎兒非常關鍵。"},
+      mistakes:[]}
+  ]
+});

@@ -1,0 +1,61 @@
+SCENARIOS.push({
+  id:"trauma-blast-injury", category:"trauma", difficulty:5,
+  title:"工廠氣爆傷患：多重機轉同時存在",
+  summary:"氣爆現場的傷患同時合併燒傷、穿刺傷與內部震波傷害，練習辨識爆炸傷害的多重機轉，遺漏任何一種都可能造成嚴重後果。",
+  steps:[
+    {type:"action", scene:"工廠化學槽氣爆，你在安全區評估一名從現場自行走出的員工，他臉部與手臂有燒傷，衣服有多處破損。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"generalImpression",target:"patient",
+        giRelevant:["patient:distress","chest:chestWound"],
+        giFindings:{
+          "patient:distress":"呼吸有點喘、耳朵一直說聽不清楚你說話",
+          "chest:chestWound":"胸口與手臂有數個小傷口，像是被碎片刺穿"
+        },
+        explain:"爆炸傷患常同時合併燒傷、碎片穿刺傷與震波造成的內部傷害，建立整體印象時要同時留意這幾種不同機轉。"},
+      mistakes:[]},
+    {type:"choice", scene:"他說耳朵聽不清楚、有點耳鳴，你注意到他的呼吸有點喘，但體表看起來只有燒傷跟幾個小傷口，沒有明顯大出血。",
+      question:"爆炸傷患的評估，為什麼不能只看體表看得到的燒傷與傷口？",
+      choices:[
+        {text:"爆炸同時有三種機轉：震波衝擊內臟（肺部、耳朵）、碎片造成穿刺傷、火焰造成燒傷；體表看起來不嚴重，震波內傷仍可能稍後才顯現", correct:true, explain:"爆炸傷害的複雜之處在於「原發性」震波傷害可能完全沒有外顯傷口，卻可能造成嚴重的肺部或腸道損傷，不能只評估看得到的燒傷與穿刺傷。"},
+        {text:"爆炸造成的傷害本質上跟一般外傷一樣，只要處理好看得到的傷口跟燒傷就足夠了", correct:false, explain:"爆炸傷害還包含看不到的震波內部損傷，不能只處理表面看得到的傷勢。"},
+        {text:"耳鳴只是暫時性的聽力反應，跟身體其他部位的傷害沒有關聯，可以先不用理會", correct:false, explain:"耳鳴合併呼吸急促，可能提示震波對耳膜與肺部都造成了影響，不應該分開看待。"},
+        {text:"只要沒有明顯大出血，爆炸傷患的傷勢通常就不會太嚴重，可以按一般外傷處理", correct:false, explain:"沒有明顯大出血不能排除嚴重的內部震波傷害，這類傷害往往需要更高的警覺。"}
+      ]},
+    {type:"action", scene:"你決定評估他的呼吸。",
+      prompt:"你會做什麼檢查？",
+      correct:{tool:"lookListenFeel",target:"chest",respRate:28,
+        reading:"28次/分，呼吸略淺費力，聽起來有些微弱的異常聲音",
+        explain:"震波可能造成肺部挫傷（blast lung），呼吸速率與品質的變化是重要的早期線索。"},
+      mistakes:[]},
+    {type:"action", scene:"呼吸評估後。",
+      prompt:"你會用什麼工具評估他的血氧？",
+      correct:{tool:"pulseOximeter",target:"leftArm",altTargets:["rightArm"],
+        reading:"SpO2 91%，脈搏 114次/分",
+        explain:"血氧偏低合併呼吸型態異常，支持震波造成肺部損傷的可能性，需要積極處置。"},
+      mistakes:[]},
+    {type:"action", scene:"你決定處理他的燒傷。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"coolBurn",target:"leftArm",altTargets:["rightArm"],
+        explain:"以清水沖洗降溫燒傷部位，同時避免耽誤對可能更嚴重的震波傷害的評估與處置時間。"},
+      mistakes:[]},
+    {type:"action", scene:"燒傷降溫處理後。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"疑似肺部震波傷害合併血氧偏低，應給予高濃度氧氣支持，並儘速送醫。"},
+      mistakes:[]},
+    {type:"choice", scene:"同伴問你，他體表傷勢看起來不算太嚴重，是不是可以排在後面比較不緊急的順位再送醫。",
+      question:"你會怎麼回答？",
+      choices:[
+        {text:"不應該只憑體表傷勢判斷優先度，他合併呼吸急促、血氧偏低與耳鳴，這些都是震波內傷的警訊，應該列為需要儘速送醫的高優先傷患", correct:true, explain:"爆炸傷患的檢傷不能只看體表傷勢，呼吸與血氧的異常合併爆炸病史，代表需要高度警覺的內部損傷風險。"},
+        {text:"同意這個判斷，體表傷勢不嚴重的傷患確實可以排在後面的順位", correct:false, explain:"這樣的判斷會忽略震波造成的內部傷害警訊，不應該只憑體表傷勢決定優先順序。"},
+        {text:"應該完全依照傷患自己主觀感覺的疼痛程度來決定送醫順序", correct:false, explain:"主觀疼痛感受不能完全反映實際的傷勢嚴重度，應綜合客觀評估發現來判斷。"},
+        {text:"爆炸現場的傷患一律排在最後處理，因為機轉太複雜難以現場判斷，等到院後再分類", correct:false, explain:"現場仍應該依照評估發現做出合理的優先度判斷，而不是一概排在最後處理。"}
+      ]},
+    {type:"action", scene:"準備送醫。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明爆炸機轉、呼吸與血氧變化、耳鳴等震波相關症狀，以及燒傷處置經過，這些資訊對醫院評估是否有肺部或其他內部震波傷害非常重要。"},
+      mistakes:[]}
+  ]
+});

@@ -181,6 +181,7 @@
   .monitor-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;cursor:pointer;font-size:0.85rem;}
   .monitor-item.checked{border-color:#1e6b4f;background:#f1faf6;}
   .monitor-item input{width:17px;height:17px;accent-color:#1e6b4f;cursor:pointer;}
+  .checklist-hint{font-size:0.76rem;color:var(--muted);margin:0 0 10px;line-height:1.5;}
   /* oxygen panel */
   .o2-panel{background:#eef7f5;border:1px solid #b9ded6;border-radius:12px;padding:14px;margin-top:10px;}
   .o2-panel h4{margin:0 0 10px;font-size:0.85rem;color:#146c5b;}

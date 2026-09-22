@@ -92,6 +92,8 @@ const TOOLS = [
   T("history","病史詢問(SAMPLE/OPQRST)","judgement",false,"patient","speech",false),
   T("fastStrokeCheck","中風評估(FAST)","judgement",false,"head","head",false),
   T("ongoingMonitor","持續評估監測","judgement",false,"patient","stethoscope",false),
+  T("primaryAssessment","初次評估（意識/呼吸道/呼吸/循環）","judgement",false,"patient","eye",false),
+  T("secondaryAssessment","二次評估（生命徵象/病史/身體檢查）","judgement",false,"patient","magnifier",false),
 
   T("penlight","瞳孔筆燈檢查","instruments",false,"head","flashlight",true),
   T("bloodPressure","血壓測量","instruments",true,["leftArm","rightArm"],"bloodPressure",true,"bloodPressure.jpg"),
@@ -780,6 +782,22 @@ const MONITOR_CHECKLIST = [
   {id:"intervention", label:"確認先前的處置是否仍然有效（如給氧、固定、止血）"},
   {id:"trend", label:"記錄這次生命徵象，跟上一次比較趨勢"}
 ];
+/* 初次評估／二次評估複習用checklist，跟持續評估共用同一套面板樣式，
+   但各自獨立追蹤勾選狀態，練習完整的標準流程骨架而不是只操作單一步驟。 */
+const PRIMARY_ASSESSMENT_CHECKLIST = [
+  {id:"impression", label:"一般印象與傷病機轉（MOI/NOI、年齡、性別、整體外觀）"},
+  {id:"loc", label:"意識程度評估（AVPU）"},
+  {id:"airway", label:"呼吸道評估（是否暢通、有無阻塞）"},
+  {id:"breathing", label:"呼吸評估（速率、深度、是否足夠）"},
+  {id:"circulation", label:"循環評估（脈搏、皮膚、有無大出血）"},
+  {id:"priority", label:"決定送醫優先度（是否需要立即送醫）"}
+];
+const SECONDARY_ASSESSMENT_CHECKLIST = [
+  {id:"vitals", label:"完整生命徵象測量（血壓、脈搏、呼吸、體溫、血氧）"},
+  {id:"history", label:"病史詢問（SAMPLE／OPQRST）"},
+  {id:"exam", label:"身體檢查（依主訴重點檢查，創傷則頭到腳快速評估）"},
+  {id:"plan", label:"決定後續處置與是否需要持續評估、送醫途中重新檢查"}
+];
 
 /* ===================== 病人圖示座標 ===================== */
 const BODY_SHAPES = {
@@ -844,7 +862,7 @@ function renderMenu(){
         <h3>案例 #${idx+1}</h3>
         <p class="summary">分類與內容遊玩中自己找線索判斷，完成後才會揭曉。</p>
         <div class="meta">
-          <span class="stars">${"★".repeat(sc.difficulty)}${"☆".repeat(3-sc.difficulty)}</span>
+          <span class="stars">${"★".repeat(sc.difficulty)}${"☆".repeat(5-sc.difficulty)}</span>
           <span>${st.plays>0 ? `最佳 ${st.best}% ・ 已玩 ${st.plays} 次` : "尚未挑戰"}</span>
         </div>`;
     } else {
@@ -853,7 +871,7 @@ function renderMenu(){
         <h3>${sc.title}</h3>
         <p class="summary">${sc.summary}</p>
         <div class="meta">
-          <span class="stars">${"★".repeat(sc.difficulty)}${"☆".repeat(3-sc.difficulty)}</span>
+          <span class="stars">${"★".repeat(sc.difficulty)}${"☆".repeat(5-sc.difficulty)}</span>
           <span>${st.plays>0 ? `最佳 ${st.best}% ・ 已玩 ${st.plays} 次` : "尚未挑戰"}</span>
         </div>`;
     }
@@ -1088,6 +1106,10 @@ function renderStep(){
   state.posOpen = false;
   state.monitorOpen = false;
   state.monitorChecked = [];
+  state.primaryAssessOpen = false;
+  state.primaryChecked = [];
+  state.secondaryAssessOpen = false;
+  state.secondaryChecked = [];
   state.gcsOpen = false;
   state.gcsSelected = {e:null, v:null, m:null};
 
@@ -1207,6 +1229,8 @@ function renderActionStep(step){
   document.getElementById("o2Wrap").classList.toggle("open", state.o2Open);
   document.getElementById("posWrap").classList.toggle("open", state.posOpen);
   document.getElementById("monitorWrap").classList.toggle("open", state.monitorOpen);
+  document.getElementById("primaryAssessWrap").classList.toggle("open", state.primaryAssessOpen);
+  document.getElementById("secondaryAssessWrap").classList.toggle("open", state.secondaryAssessOpen);
   renderTrayTabs();
   renderTrayTools();
   renderTechTabs();
@@ -1215,6 +1239,8 @@ function renderActionStep(step){
   renderPosPanel();
   renderGcsPanel();
   renderMonitorPanel();
+  renderPrimaryAssessPanel();
+  renderSecondaryAssessPanel();
   renderPatientSvg();
   updateDiagramHighlights();
   document.getElementById("selectedToolHint").classList.add("hidden");
@@ -1591,6 +1617,50 @@ document.getElementById("monitorConfirmBtn").onclick = ()=>{
   evaluateAction("ongoingMonitor","patient");
 };
 
+function renderPrimaryAssessPanel(){
+  const wrap = document.getElementById("primaryAssessChecklist");
+  wrap.innerHTML = "";
+  PRIMARY_ASSESSMENT_CHECKLIST.forEach(item=>{
+    const checked = state.primaryChecked.includes(item.id);
+    const row = document.createElement("label");
+    row.className = "monitor-item" + (checked ? " checked":"");
+    row.innerHTML = `<input type="checkbox" ${checked?"checked":""}> <span>${item.label}</span>`;
+    row.querySelector("input").onchange = (e)=>{
+      if(e.target.checked){ if(!state.primaryChecked.includes(item.id)) state.primaryChecked.push(item.id); }
+      else { state.primaryChecked = state.primaryChecked.filter(id=>id!==item.id); }
+      renderPrimaryAssessPanel();
+    };
+    wrap.appendChild(row);
+  });
+  document.getElementById("primaryAssessConfirmBtn").disabled = state.primaryChecked.length < PRIMARY_ASSESSMENT_CHECKLIST.length || state.answered;
+}
+document.getElementById("primaryAssessConfirmBtn").onclick = ()=>{
+  if(state.primaryChecked.length < PRIMARY_ASSESSMENT_CHECKLIST.length || state.answered) return;
+  evaluateAction("primaryAssessment","patient");
+};
+
+function renderSecondaryAssessPanel(){
+  const wrap = document.getElementById("secondaryAssessChecklist");
+  wrap.innerHTML = "";
+  SECONDARY_ASSESSMENT_CHECKLIST.forEach(item=>{
+    const checked = state.secondaryChecked.includes(item.id);
+    const row = document.createElement("label");
+    row.className = "monitor-item" + (checked ? " checked":"");
+    row.innerHTML = `<input type="checkbox" ${checked?"checked":""}> <span>${item.label}</span>`;
+    row.querySelector("input").onchange = (e)=>{
+      if(e.target.checked){ if(!state.secondaryChecked.includes(item.id)) state.secondaryChecked.push(item.id); }
+      else { state.secondaryChecked = state.secondaryChecked.filter(id=>id!==item.id); }
+      renderSecondaryAssessPanel();
+    };
+    wrap.appendChild(row);
+  });
+  document.getElementById("secondaryAssessConfirmBtn").disabled = state.secondaryChecked.length < SECONDARY_ASSESSMENT_CHECKLIST.length || state.answered;
+}
+document.getElementById("secondaryAssessConfirmBtn").onclick = ()=>{
+  if(state.secondaryChecked.length < SECONDARY_ASSESSMENT_CHECKLIST.length || state.answered) return;
+  evaluateAction("secondaryAssessment","patient");
+};
+
 function onToolClick(tool){
   if(state.answered) return;
   if(tool.id==="positionPatient"){
@@ -1627,6 +1697,16 @@ function onToolClick(tool){
   if(tool.id==="ongoingMonitor"){
     state.monitorOpen = !state.monitorOpen;
     document.getElementById("monitorWrap").classList.toggle("open", state.monitorOpen);
+    return;
+  }
+  if(tool.id==="primaryAssessment"){
+    state.primaryAssessOpen = !state.primaryAssessOpen;
+    document.getElementById("primaryAssessWrap").classList.toggle("open", state.primaryAssessOpen);
+    return;
+  }
+  if(tool.id==="secondaryAssessment"){
+    state.secondaryAssessOpen = !state.secondaryAssessOpen;
+    document.getElementById("secondaryAssessWrap").classList.toggle("open", state.secondaryAssessOpen);
     return;
   }
   if(tool.id==="cpr"){
@@ -1849,6 +1929,8 @@ function disableTray(){
   document.getElementById("o2FlowSlider").disabled = true;
   document.querySelectorAll(".monitor-item input").forEach(b=> b.disabled = true);
   document.getElementById("monitorConfirmBtn").disabled = true;
+  document.getElementById("primaryAssessConfirmBtn").disabled = true;
+  document.getElementById("secondaryAssessConfirmBtn").disabled = true;
 }
 
 /* ===================== CPR 模擬小遊戲 ===================== */
@@ -2735,7 +2817,7 @@ function finishScenario(){
   resultScreen.classList.remove("hidden");
 
   document.getElementById("resultTitle").textContent = sc.title;
-  document.getElementById("resultCategory").textContent = `分類：${CATEGORY_LABELS[sc.category]}　難度：${"★".repeat(sc.difficulty)}${"☆".repeat(3-sc.difficulty)}`;
+  document.getElementById("resultCategory").textContent = `分類：${CATEGORY_LABELS[sc.category]}　難度：${"★".repeat(sc.difficulty)}${"☆".repeat(5-sc.difficulty)}`;
   document.getElementById("resultScore").textContent = `${state.correctCount} / ${total}（${pct}%）`;
   document.getElementById("resultSub").textContent =
     pct===100 ? "完美！流程完全正確。" :

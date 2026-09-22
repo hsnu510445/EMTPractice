@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-anaphylaxis-arrest", category:"special", difficulty:5,
+  title:"過敏性休克患者突然倒下沒有反應",
+  summary:"嚴重過敏反應病患在你處置過程中突然心跳停止，練習同時處理病因（過敏）與急救（CPR）兩件事，順序錯了可能兩頭空。",
+  steps:[
+    {type:"choice", scene:"一名年輕男性吃了海鮮後全身紅疹、嘴唇腫脹、呼吸有喘鳴聲，意識還清楚，家屬正在翻找他的腎上腺素自動注射筆。",
+      question:"這樣的表現讓你優先懷疑什麼？",
+      choices:[
+        {text:"過敏性休克，屬於立即威脅生命的緊急狀況，需要優先處理呼吸道並儘速使用腎上腺素自動注射筆", correct:true, explain:"全身紅疹、嘴唇腫脹、呼吸喘鳴是嚴重過敏反應的典型表現，需要優先積極處置。"},
+        {text:"這應該是食物中毒引起的腸胃不適反應，先觀察排便狀況就好", correct:false, explain:"紅疹、嘴唇腫脹、呼吸喘鳴不是食物中毒常見的表現，應優先考慮過敏性休克。"},
+        {text:"可能只是對海鮮輕微過敏，塗一點藥膏、多喝水應該就會緩解", correct:false, explain:"合併呼吸道症狀的全身性過敏反應遠比單純皮膚過敏嚴重，需要積極處置。"},
+        {text:"他可能是嚇到換氣過度，讓他冷靜深呼吸應該就能改善", correct:false, explain:"紅疹與嘴唇腫脹是客觀的生理反應，不是單純情緒緊張造成的換氣過度。"}
+      ]},
+    {type:"action", scene:"你找到他隨身攜帶的腎上腺素自動注射筆。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"epiPenAssist",target:"leftLeg",altTargets:["rightLeg"],explain:"依當地規範協助使用病患本身的腎上腺素自動注射筆，這是治療過敏性休克的第一線藥物，注射於大腿外側。"},
+      mistakes:[]},
+    {type:"action", scene:"打完腎上腺素後，你給予氧氣支持。",
+      prompt:"你會給予？",
+      correct:{tool:"oxygenMask",target:"head",
+        oxygenSpec:{device:"nonRebreather", flowMin:10, flowMax:15},
+        explain:"呼吸道腫脹合併過敏反應，應給予高濃度氧氣支持。"},
+      mistakes:[]},
+    {type:"emergency", timeLimit:8, randomChance:0.55,
+      scene:"就在你準備測量生命徵象時，他突然癱軟倒下、完全沒有反應，也沒有正常呼吸。",
+      question:"這個瞬間，你最優先的反應是什麼？",
+      choices:[
+        {text:"立即確認無反應無呼吸後開始CPR，同時請旁人呼叫119與取得AED，病因處置（已給腎上腺素）與CPR可以同時進行", correct:true, explain:"心跳停止時CPR不能被任何其他處置延誤，即使已經知道病因是過敏性休克，急救的優先順序仍然是立即開始CPR，其他處置由旁人或後續協助同時進行。"},
+        {text:"先確認剛才腎上腺素的劑量是否足夠，考慮先追加一劑腎上腺素再決定要不要開始CPR", correct:false, explain:"無反應無呼吸時不能等待其他判斷，應該立即開始CPR，不應該讓額外的藥物考量延誤心肺復甦的開始。"},
+        {text:"先讓他平躺休息幾分鐘，觀察會不會自己恢復呼吸再決定下一步", correct:false, explain:"無反應無呼吸是心跳停止的表現，不應該被動觀察等待，應立即開始CPR。"},
+        {text:"先重新評估他的過敏反應嚴重度，確認診斷正確後再決定急救方式", correct:false, explain:"眼前的無反應無呼吸就是需要立即行動的訊號，不需要重新確認診斷才開始CPR。"}
+      ]},
+    {type:"action", scene:"你立即開始急救。",
+      prompt:"開始完整的CPR流程（含AED）",
+      cprSim:true,
+      correct:{tool:"cpr",target:"chest",explain:"過敏性休克導致的心跳停止，急救流程與一般心跳停止相同，CPR與AED不能被病因處置延誤，過敏相關的處置（腎上腺素）已經給予，接下來全力專注在高品質CPR上。"},
+      mistakes:[]},
+    {type:"action", scene:"急救進行中，你留意到他的呼吸道腫脹狀況。",
+      prompt:"給氧與人工呼吸支持時你會特別注意什麼？",
+      correct:{tool:"suction",target:"head",explain:"過敏反應造成的呼吸道腫脹與分泌物可能讓人工呼吸更加困難，必要時使用抽吸清除影響通氣的分泌物，確保每次給氣都能有效進入。"},
+      mistakes:[]},
+    {type:"action", scene:"持續急救並準備送醫。",
+      prompt:"接下來你應該？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測急救反應與是否恢復自主循環，過敏性休克造成的心跳停止在及早給予腎上腺素合併高品質CPR下，仍有機會恢復，不應放棄。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明過敏原、腎上腺素給予的時間與劑量、心跳停止發生的時間與急救經過，這些資訊對醫院後續處置非常關鍵。"},
+      mistakes:[]}
+  ]
+});

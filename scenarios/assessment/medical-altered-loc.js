@@ -38,6 +38,10 @@ SCENARIOS.push({
         {text:"如果已經超過一般認知的黃金時間，代表治療效果有限，送醫的急迫性可以降低", correct:false, explain:"即使超過部分治療的時間窗，仍應盡速送醫，由醫院評估還能採取哪些處置。"},
         {text:"時間點交給家屬記得就好，救護人員抵達現場後應優先專注在生命徵象測量", correct:false, explain:"發作時間是救護人員應主動詢問並記錄清楚的重要資訊，不應只依賴家屬記憶且事後才補問。"}
       ]},
+    {type:"action", scene:"確認優先度後，同伴協助準備搬運，你還有一點時間。",
+      prompt:"上車前你會做什麼？",
+      correct:{tool:"secondaryAssessment",target:"patient",explain:"病人目前狀況相對穩定、有短暫時間，應把握機會完成二次評估（完整生命徵象、病史、身體檢查），為送醫途中的持續評估建立更完整的基準資料。"},
+      mistakes:[]},
     {type:"action", scene:"你決定送醫。",
       prompt:"送醫途中你應該？",
       correct:{tool:"ongoingMonitor",target:"patient",explain:"疑似中風病人吞嚥功能可能受損，經口給予食物水分有嗆入風險，應禁食並持續監測意識與生命徵象。"},

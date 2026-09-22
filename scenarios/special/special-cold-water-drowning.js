@@ -1,0 +1,53 @@
+SCENARIOS.push({
+  id:"special-cold-water-drowning", category:"special", difficulty:5,
+  title:"冰冷溪水中撈起的無反應男子",
+  summary:"低溫溪水中溺水超過20分鐘、無反應無呼吸，練習低體溫合併溺水時「還沒暖到、不輕易判定死亡」的特殊原則。",
+  steps:[
+    {type:"action", scene:"你到達山區溪流邊，消防隊剛把一名30歲男子從冰冷的溪水中撈起，同伴說他大概在水裡超過20分鐘才被發現，全身冰冷、沒有反應。",
+      prompt:"你會先做什麼？",
+      correct:{tool:"sceneCheck",target:"scene",explain:"溪邊地形濕滑且可能有持續水流危險，確認自己與傷患目前所在位置穩定安全，再開始評估。"},
+      mistakes:[]},
+    {type:"action", scene:"確認安全後，你檢查他的呼吸與脈搏。",
+      prompt:"你會怎麼做？",
+      correct:{tool:"pulseCheck",target:"neck",
+        reading:"仔細觸診30秒以上，勉強摸到極微弱、極緩慢的搏動，胸廓沒有明顯起伏",
+        explain:"低體溫病人的脈搏可能極度緩慢微弱，需要比平常更久的時間仔細確認，避免太快判斷「沒有脈搏」而錯失還存在的循環。"},
+      mistakes:[]},
+    {type:"choice", scene:"同伴摸了幾秒沒有摸到脈搏，說「應該是沒救了，準備直接判定死亡吧」。",
+      question:"你會怎麼回應？",
+      choices:[
+        {text:"低體溫會大幅降低代謝速率，即使脈搏極度微弱也不能輕易判死；原則是「還沒回溫、依然沒生命徵象，才考慮死亡」，應立即急救並後送", correct:true, explain:"這是低體溫溺水的重要原則：低溫會大幅降低身體代謝與氧氣需求，有時看似死亡的病人在回溫後仍有機會恢復，「還沒暖、不輕易判死」是搶救這類病人的核心觀念。"},
+        {text:"觸診沒有摸到脈搏，加上泡水超過20分鐘，這樣可以直接判定死亡不用再急救", correct:false, explain:"低體溫會讓脈搏極度微弱緩慢、不容易觸診到，不應該僅憑短暫觸診沒摸到就判定死亡。"},
+        {text:"應該先讓他自然回溫幾個小時，等體溫恢復正常再重新評估要不要開始急救", correct:false, explain:"不應該延遲急救去等待自然回溫，應立即開始急救並在後送過程中同步處理體溫問題。"},
+        {text:"溺水超過20分鐘，依經驗判斷腦部應該缺氧太久，急救已經沒有意義", correct:false, explain:"低體溫對腦部有一定的保護效果，可能延緩缺氧造成的損傷，不能直接套用一般常溫溺水的時間經驗判斷。"}
+      ]},
+    {type:"action", scene:"你決定立即開始急救。",
+      prompt:"開始完整的CPR流程（含AED）",
+      cprSim:true,
+      correct:{tool:"cpr",target:"chest",explain:"確認無呼吸無脈搏應立即開始CPR並儘速使用AED；低體溫病人對藥物與電擊的反應可能與常溫病人不同，仍應依標準流程執行並儘速送醫，途中持續回溫。"},
+      mistakes:[]},
+    {type:"action", scene:"急救進行中，同伴協助保暖與後送準備。",
+      prompt:"你會提醒同伴注意什麼？",
+      correct:{tool:"blanket",target:"patient",
+        explain:"移除濕冷衣物、以毛毯包裹被動回溫，並儘量減少劇烈搬動（劇烈搬動可能誘發致命性心律不整），同時持續急救不中斷。"},
+      mistakes:[]},
+    {type:"choice", scene:"搬運過程中，同伴不小心讓擔架晃動得比較大力。",
+      question:"這對低體溫病人有什麼特別的風險？",
+      choices:[
+        {text:"低體溫病人的心臟對機械性刺激特別敏感，劇烈搬動可能讓周邊冰冷血液突然大量回流心臟，誘發致命性心律不整，搬運時應盡量輕柔平穩", correct:true, explain:"這是低體溫病人搬運時特別強調動作輕柔的原因，劇烈晃動有誘發心跳停止或惡化心律不整的風險。"},
+        {text:"劇烈晃動對低體溫病人沒有特別的風險，跟一般病人搬運注意事項相同", correct:false, explain:"低體溫病人對機械性刺激特別敏感，搬運風險比一般病人更高，需要特別留意。"},
+        {text:"只要正在進行CPR，搬運過程中晃動大小就不會影響病人狀況", correct:false, explain:"即使正在CPR，搬運時的劇烈晃動仍可能對心臟節律造成額外的不良影響。"},
+        {text:"這種風險只在病人體溫完全恢復正常後才需要注意，急救中的病人不用擔心", correct:false, explain:"急救中的低體溫病人風險反而更高，不是完全恢復正常後才需要注意。"}
+      ]},
+    {type:"action", scene:"持續急救並準備送醫。",
+      prompt:"接下來你應該？",
+      correct:{tool:"ongoingMonitor",target:"patient",
+        explain:"持續監測急救反應、核心體溫變化趨勢，並儘速送往有能力處理低體溫復甦的醫院。"},
+      mistakes:[]},
+    {type:"action", scene:"抵達醫院前。",
+      prompt:"交班時你會特別說明什麼？",
+      correct:{tool:"handoverReport",target:"scene",
+        explain:"交班時要說明溺水與失溫的時間、水溫與環境狀況、急救開始的時間與過程，這些資訊對醫院判斷是否持續積極復甦非常關鍵。"},
+      mistakes:[]}
+  ]
+});
